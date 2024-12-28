@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import AntDesign from '@expo/vector-icons/AntDesign';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import Feather from '@expo/vector-icons/Feather';
 import Entypo from '@expo/vector-icons/Entypo';
-
 import { 
     View, 
     Text, 
@@ -13,42 +11,62 @@ import {
     ScrollView, 
     Modal,
     KeyboardAvoidingView,
+    Keyboard,
     Platform,
     Alert,
+    ImageBackground,
+    Image,
 } from "react-native";
-
+import Svg, { Circle, G } from "react-native-svg";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { theme } from "../Colors";
-import styles from "./HomeScreenStyles"
+import styles from "./HomeScreenStyles";
 
 const STORAGE_KEY = "@folders";
 
 const HomeScreen = ({ setTapPressed }) => {
-    const [modal, setModal] = useState(false);
-    const [ nameModal, setNameModal ] = useState(false);
-    const [ fileModal, setFileModal ] = useState(false);
-    const [ name, setName ] = useState("");
-    const [ folders, setFolders ] = useState({});
+    const [nameModal, setNameModal] = useState(false);
+    const [fileModal, setFileModal] = useState(false);
+    const [name, setName] = useState("");
+    const [folders, setFolders] = useState({});
+    const [selectedFolderKey, setSelectedFolderKey] = useState(null); // 선택된 폴더 키 상태 추가
+    const [isKetboardVisible, setKeyboardVisible] = useState(false);
+
     useEffect(() => {
         loadFolders();
-    }, []);
+        const keyboardDidShowListener = Keyboard.addListener("keyboardDidShow", () =>
+        setKeyboardVisible(true)
+        );
+        const keyboardDidHideListener = Keyboard.addListener("keyboardDidHide", () =>
+        setKeyboardVisible(false)
+        );
+        
+        
+              // 컴포넌트 언마운트 시 리스너 제거
+              return () => {
+                keyboardDidShowListener.remove();
+                keyboardDidHideListener.remove();
+              };
+        }, []);
 
-    const toggleModal = () => setModal(true);
-    const closeModal = () => setModal(false);
-
-    const namefolder = () => {
+    const addFolderModal = () => {
         setNameModal(true);
     };
+
     const closenameModal = () => {
         setNameModal(false);
         setName("");
     };
 
-    const pressedQ = () => setTapPressed(true);
-    const pressedW = () => setTapPressed(false);
+    const folderModal = (key) => {
+        setSelectedFolderKey(key); // 선택된 폴더 키 저장
+        setFileModal(true); // 모달 열기
+    };
 
-    const folderModal = () => setFileModal(true);
-    const closeFolderModal = () => setFileModal(false);
+    const closeFolderModal = () => {
+        setFileModal(false);
+        setSelectedFolderKey(null); // 모달 닫을 때 선택된 키 초기화
+    };
 
     const onChangeText = (payload) => setName(payload);
 
@@ -68,10 +86,10 @@ const HomeScreen = ({ setTapPressed }) => {
             ...folders,
             [Date.now()]: { name: folderName }, // 객체 구조 확인
         };
-            setFolders(newFolders);
-            await saveFolders(newFolders);
-            setName("");
-        };
+        setFolders(newFolders);
+        await saveFolders(newFolders);
+        setName("");
+    };
 
     const deleteFolder = (key) => {
         Alert.alert("폴더 삭제", "폴더를 삭제하시겠습니까?", [
@@ -100,201 +118,167 @@ const HomeScreen = ({ setTapPressed }) => {
         setName("");
     };
 
+    const radius = 140;
+    const strokeWidth = 25;
+    const circumference = 2 * Math.PI * radius;
+    const percentage = 85;
+    const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
     return (
         <View style={styles.container}>
-        <StatusBar style="light" />
-        <View style={styles.header}>
-            <Text style={styles.headerText}>문제 생성</Text>
-            <TouchableOpacity onPress={toggleModal}>
-                <View 
-                style={styles.addButton}>
-                <AntDesign name="addfile" size={30} style={styles.addIcon} />
-                </View> 
-            </TouchableOpacity>
-        </View>
-        <View style={styles.separator} />
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-            <View style={styles.row}>
-                {Object.keys(folders).map((key) => (
-                    <View
-                        key={key} 
-                        flexDirection="column" 
-                        justifyContent= "center"
-                        alignItems="center">
-                    <TouchableOpacity>
-                        <Ionicons name="folder" size={100} style={styles.folderIcon}/> 
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        onPress={folderModal}>
-                        <View flexDirection="row">
-                            <Text style={styles.folderName}>
-                                {folders[key] && typeof folders[key].name === 'string' ? folders[key].name : "폴더 이름 없음"}
-                            </Text>
-                            <Entypo name="chevron-small-down" size={24} color={theme.TextColor} />
+            <StatusBar style="light" />
+            <View style={styles.header}>
+                <ImageBackground
+                    source={require('../images/Top app bar.png')}
+                    style={styles.headerBg}
+                    resizeMode="contain"
+                    imageStyle={{ borderRadius: 12 }}>
+                    <View style={{ flexDirection: "row" }}>
+                        <Text style={styles.headerText}>JIQ</Text>
+                    </View>
+                    <View style={{ flexDirection: "row" }}>
+                        <View style={styles.separator} />
+                        <TouchableOpacity onPress={addFolderModal}>
+                            <View style={styles.addButton}>
+                                <AntDesign name="pluscircleo" size={24} style={styles.addIcon} />
+                            </View> 
+                        </TouchableOpacity>
+                    </View>
+                </ImageBackground>
+            </View>
+            <View style={{ flex: 1 }}>
+                <ImageBackground
+                    source={require('../images/folder frame.png')}
+                    style={styles.screen}
+                    resizeMode="contain"
+                    imageStyle={{ borderRadius: 12 }}>
+                    <ScrollView contentContainerStyle={styles.scrollContainer}>
+                        <View style={styles.row}>
+                            {Object.keys(folders).map((key) => (
+                                <View key={key} style={{ flexDirection: "column", justifyContent: "center", alignItems: "center", paddingVertical: 10 }}>
+                                    <TouchableOpacity>
+                                        <Image 
+                                            source={require('../images/Folder Open 01.png')}
+                                            style={styles.Icon} />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => folderModal(key)}> {/* 모달 열기 핸들러 수정 */}
+                                        <View style={{ flexDirection: "row" }}>
+                                            <Text style={styles.folderName}>
+                                                {folders[key] && typeof folders[key].name === 'string' ? folders[key].name : "폴더 이름 없음"}
+                                            </Text>
+                                            <Entypo name="dots-three-vertical" 
+                                                    style={{ marginTop: 3 }} 
+                                                    size={15} 
+                                                    color={theme.TextColor} />
+                                        </View>
+                                    </TouchableOpacity>
+                                </View>
+                            ))}
                         </View>
-                    </TouchableOpacity>
-                    <Modal
-                    visible={fileModal}
-                    transparent={true}
-                    animationType="slide">
-                        <KeyboardAvoidingView
-                        style={styles.modalContainer}
-                        behavior={Platform.OS === "ios" ? "padding" : "height"}>
-                            <View style={styles.modal}>
-                            <View style={styles.folderModalScreen}>
-                                <TextInput
-                                onChangeText={onChangeText}
-                                onSubmitEditing={() => changeName(key)}
-                                returnKeyType="done"
-                                value = {name}
-                                placeholder={folders[key]?.name || "폴더 이름"}
-                                style={styles.changeNameinput}
-                                />
-                                <TouchableOpacity
-                                style={styles.modalButton}
-                                >
-                                <Text 
-                                style={{...styles.modalText, 
-                                color: theme.TextColor,
-                                fontSize: 24,
-                                fontWeight: "600",
-                                textAlign: "center"}}>문제 다시보기</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                style={styles.modalButton}
-                                >
-                                <Text 
-                                style={{...styles.modalText, 
-                                color: theme.TextColor,
-                                fontSize: 24,
-                                fontWeight: "600",
-                                textAlign: "center"}}>오답률 확인</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                style={{...styles.modalButton, backgroundColor:theme.wrongSign}}
-                                onPress={() => deleteFolder(key)}
-                                >
-                                <Text 
-                                style={{...styles.modalText, 
-                                color: theme.bg,
-                                fontSize: 24,
-                                fontWeight: "600",
-                                textAlign: "center"}}>폴더 삭제</Text>
-                                </TouchableOpacity>
-                            </View>
-                            <View style={{...styles.folderModalScreen, paddingVertical: 3}}>
-                                <TouchableOpacity
-                                style={{...styles.modalButton, backgroundColor:theme.bg}}
-                                onPress={closeFolderModal}
-                                >
-                                <Text 
-                                style={{...styles.modalText, 
-                                color: theme.TextColor,
-                                fontSize: 24,
-                                fontWeight: "600",
-                                textAlign: "center"}}>완료</Text>
-                                </TouchableOpacity>
-                            </View>
-                            </View>
-                        </KeyboardAvoidingView>
-                    </Modal>
-                    </View>
-                ))}
-                <Modal 
-                    visible={modal}
-                    transparent={true}
-                    animationType="slide"
-                >
+                    </ScrollView>
+                </ImageBackground>
+            </View>
+
+            {/* 모달 */}
+            <Modal visible={fileModal} transparent={true} animationType="slide">
+                <KeyboardAvoidingView style={styles.modalContainer} behavior={Platform.OS === "ios" ? "padding" : "height"}>
                     <View style={styles.modal}>
-                        <TouchableOpacity
-                            style={styles.modalItem}
-                            onPress={() => {
-                                closeModal();
-                                namefolder();
-                            }}>
-                            <AntDesign name="addfolder" size={24} color="white" />  
-                            <Text style={styles.modalText}>
-                                폴더 생성
-                            </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.modalItem} onPress={() => {}}>
-                            <AntDesign name="upload" size={24} color="white" />
-                            <Text style={styles.modalText}>
-                                파일 불러오기
-                            </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
-                        <AntDesign name="closesquare" size={24} color="white" />
-                            <Text style={{...styles.modalText, textAlign:"center"}}>
-                                취소
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                </Modal>
-                <Modal
-                    visible={nameModal}
-                    transparent={true}
-                    animationType="slide"
-                >
-                    <KeyboardAvoidingView
-                        style={styles.modalContainer}
-                        behavior={Platform.OS === "ios" ? "padding" : "height"}>
-                            <View style={styles.modal}>
-                            <View style={styles.modalscreen}>
-                            <View flexDirection= "row">
-                            <AntDesign name="addfolder" size={40} color={theme.TextColor} />
-                            <Text style={{...styles.modalText, fontSize:35, color: theme.TextColor}}>새로운 폴더</Text>
-                            </View>
+                        <View style={{...styles.folderModalScreen, flex: 0.65}}>
                             <TextInput
                                 onChangeText={onChangeText}
+                                onSubmitEditing={() => changeName(selectedFolderKey)} // 선택된 폴더 이름 변경
                                 returnKeyType="done"
-                                value = {name}
-                                placeholder="제목 없음"
-                                style={styles.input}
+                                value={name}
+                                placeholder={folders[selectedFolderKey]?.name || "폴더 이름"}
+                                style={{...styles.input, textAlign: "center", fontSize: 30, fontWeight: "100%", width: "50%"}}
                             />
-                            <View flexDirection="row">
-                                <TouchableOpacity 
-                                    style={styles.Button} 
-                                    onPress={() => {
-                                        closenameModal();
-                                        addFolder();
-                                }}>
-                                    <Text style={{color:theme.bg, fontSize:20, textAlign: "center"}}>확인</Text>
+                            {!isKetboardVisible && (
+                            <View
+                             style={styles.PieChartContainer}>
+                            <Svg width={400} height={400}>
+                                <G rotation={-90} origin={"200, 200"}>
+                                    <Circle
+                                    cx={200}
+                                    cy={200}
+                                    r={radius}
+                                    stroke={"#7CC6E8"}
+                                    strokeWidth={strokeWidth}
+                                    fill={"none"}/>
+                                    <Circle
+                                    cx={200}
+                                    cy={200}
+                                    r={radius}
+                                    stroke={"#394C8B"}
+                                    strokeWidth={strokeWidth}
+                                    fill={"none"}
+                                    strokeDasharray={`${circumference} ${circumference}`}
+                                    strokeDashoffset={strokeDashoffset}/>
+                                </G>
+                            </Svg>
+                            <View
+                             position="absolute"
+                             justifyContent="center"
+                             alignItems="center">
+                                <Text style={styles.pieChartText}>
+                                    정답률 {"\n"} 85%
+                                 </Text>
+                            </View>
+                            </View>
+                            )}
+                            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", width: "95%" }}>
+                                <TouchableOpacity
+                                    style={{...styles.Button, backgroundColor: theme.wrongSign, paddingHorizontal: 25}}
+                                    onPress={() => {deleteFolder(selectedFolderKey)
+                                        closeFolderModal()} // 폴더 삭제 후 모달 닫기
+                                    }
+                                >
+                                    <Text style={{...styles.modalText, color: theme.bg, fontSize: 20, fontWeight: "100%", textAlign: "center"}}>폴더 삭제</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity 
-                                    style={{...styles.Button, backgroundColor:theme.wrongSign}} 
-                                    onPress={closenameModal}>   
-                                    <Text style={{color:theme.bg, fontSize:20, textAlign: "center"}}>취소</Text>
+                                <TouchableOpacity
+                                    style={{...styles.Button, paddingHorizontal: 25}}
+                                    onPress={closeFolderModal}
+                                >
+                                    <Text style={{...styles.modalText, color: theme.bg, fontSize: 20, fontWeight: "100%", textAlign: "center"}}>확인</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>
                     </View>
-                    </KeyboardAvoidingView>
-                </Modal>
-            </View>
-        </ScrollView>
-        <View style={styles.bottom}>
-            <TouchableOpacity onPress={pressedQ}>
-                <View style={styles.tabButton}>
-                    <MaterialCommunityIcons
-                    name="application-edit"
-                    size={30} 
-                    style={styles.tabIcon} />
-                    <Text style={{fontSize: 20, color:"black"}}>문제 생성</Text>
-                </View>   
-            </TouchableOpacity>
-            <View style={styles.verticalSeparator} />
-            <TouchableOpacity 
-            onPress={pressedW}>   
-                <View style={styles.tabButton}>
-                    <MaterialCommunityIcons 
-                    name="notebook-check-outline" 
-                    size={24} 
-                    style={{...styles.tabIcon, color:theme.TextColor}} />
-                    <Text style={{color: theme.TextColor}}>오답 노트</Text>
-                </View>
-            </TouchableOpacity>
-        </View>
+                </KeyboardAvoidingView>
+            </Modal>
+
+            {/* 새로운 폴더 추가 모달 */}
+            <Modal visible={nameModal} transparent={true} animationType="slide">
+                <KeyboardAvoidingView style={styles.modalContainer} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+                    <View style={styles.modal}>
+                        <View style={styles.modalscreen}>
+                            <View flexDirection="row" width="80%" alignItems="center" justifyContent="center">
+                                <AntDesign name="addfolder" size={40} color={"#394C8B"} />
+                                <Text style={{...styles.modalText, fontSize: 35, color: "#394C8B"}}>새로운 폴더</Text>
+                            </View>
+                            <View flexDirection="row" justifyContent="flex-start" alignItems="center">
+                                <Feather name="folder" size={235} color="#394C8B" />
+                                <View style={styles.inputContainer}>
+                                    <TextInput
+                                        onChangeText={onChangeText}
+                                        returnKeyType="done"
+                                        value={name}
+                                        placeholder="새로운 폴더"
+                                        style={styles.input}
+                                    />
+                                    <TouchableOpacity 
+                                        style={styles.Button} 
+                                        onPress={() => {
+                                            closenameModal();
+                                            addFolder();
+                                        }}>
+                                        <Text style={{color: theme.bg, fontSize: 20, textAlign: "center"}}>추가</Text>
+                                    </TouchableOpacity>    
+                                </View>
+                            </View>
+                        </View>
+                    </View>
+                </KeyboardAvoidingView>
+            </Modal>
         </View>
     );
 };
