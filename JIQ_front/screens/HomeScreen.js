@@ -19,12 +19,15 @@ import {
 } from "react-native";
 import Svg, { Circle, G } from "react-native-svg";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
 import { theme } from "../Colors";
 import styles from "./HomeScreenStyles";
 
 const STORAGE_KEY = "@folders";
 
 const HomeScreen = ({ setTapPressed }) => {
+    const navigation = useNavigation();
+
     const [nameModal, setNameModal] = useState(false);
     const [fileModal, setFileModal] = useState(false);
     const [name, setName] = useState("");
@@ -156,7 +159,7 @@ const HomeScreen = ({ setTapPressed }) => {
                         <View style={styles.row}>
                             {Object.keys(folders).map((key) => (
                                 <View key={key} style={{ flexDirection: "column", justifyContent: "center", alignItems: "center", paddingVertical: 10 }}>
-                                    <TouchableOpacity>
+                                    <TouchableOpacity onPress={()=> navigation.navigate("FolderScreen", {folderName:folders[key]?.name, folderKey: key})}>
                                         <Image 
                                             source={require('../images/Folder Open 01.png')}
                                             style={styles.Icon} />
