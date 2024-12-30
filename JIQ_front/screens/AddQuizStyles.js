@@ -45,7 +45,7 @@ const AddQuizStyles = StyleSheet.create({
     borderColor: "#2D3748", // 연한 회색
     borderRadius: 10,
     padding: 10,
-    marginBottom: 20,
+    marginBottom: 10,
     fontSize: 16,
     color: "#2D3748", // 짙은 네이비
     backgroundColor: "#EDF2F7", // 연한 배경색
@@ -59,8 +59,8 @@ const AddQuizStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#CBD5E0", // 버튼 배경색
-    paddingVertical: 8,
-    paddingHorizontal: 15,
+    paddingVertical: 10,
+    paddingHorizontal: 30,
     borderRadius: 10,
     marginHorizontal: 10,
   },
@@ -69,7 +69,7 @@ const AddQuizStyles = StyleSheet.create({
     backgroundColor: "#2D3748", // 선택된 버튼 색상
   },
   radioText: {
-    fontSize: 14,
+    fontSize: 18,
     color: "#FFFFFF", // 선택된 버튼 텍스트 색상
     marginLeft: 5,
   },
@@ -78,8 +78,10 @@ const AddQuizStyles = StyleSheet.create({
   },
   createButton: {
     backgroundColor: "#2D3748", // 생성 버튼 색상
-    paddingVertical: 12,
+    paddingVertical: 14, //세로
+    paddingHorizontal : 75, //가로로
     borderRadius: 10,
+    marginLeft : 20,
     alignItems: "center",
   },
   createButtonText: {
@@ -87,6 +89,35 @@ const AddQuizStyles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between", // 버튼 간격 분리
+    alignItems: "center",
+    marginTop: 10,
+  },
+  uploadButton: {
+    flex: 1, // 동일한 크기
+    backgroundColor: "#394C8B", // 업로드 버튼 배경색
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+    marginRight: 300, // 버튼 사이 여백
+    alignItems: "center",
+  },
+  filePathBox: {
+    borderWidth: 1,
+    borderColor: "#CBD5E0", // 테두리 색상
+    borderRadius: 10,
+    padding: 10,
+    marginVertical: 10, // 위아래 간격
+    backgroundColor: "#EDF2F7", // 박스 배경색
+},
+filePathText: {
+    fontSize: 14,
+    color: "#2D3748", // 텍스트 색상
+    textAlign: "center", // 텍스트 가운데 정렬
+},
+
 });
 
 export default AddQuizStyles;

@@ -1,7 +1,7 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import { StatusBar } from "expo-status-bar";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+//import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { 
     View, 
     Text, 
@@ -11,11 +11,17 @@ import {
     ScrollView,
     Modal,
     TextInput,
+    Alert,
 } from "react-native";
+import * as DocumentPicker from "expo-document-picker";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import styles from "./HomeScreenStyles";
 import AddQuizStyles from "./AddQuizStyles";
 import QuizListstyles from "./QuizListStyles";
 import { useNavigation, useRoute } from "@react-navigation/native";
+
+const STORAGE_KEY = "@quizList";
 
 const FolderScreen = ({ setTapPressed }) => {
     const navigation = useNavigation();
@@ -27,25 +33,105 @@ const FolderScreen = ({ setTapPressed }) => {
 
     const [isModalVisible, setModalVisible] = useState(false);
     const [quizName, setQuizName] = useState(""); // 퀴즈 이름 상태
-    const [quizType, setQuizType] = useState(""); // 퀴즈 유형 상태
-    const [quizList, setQuizList] = useState([]); // 퀴즈 목록 상태ㄴㄴ
+    const [quizType, setQuizType] = useState([]); // 퀴즈 유형 상태
+    const [quizList, setQuizList] = useState([]); // 퀴즈 목록 상태
+    const [selectedFile, setSelectedFile] = useState(null);
+
 
     // 모달 표시/숨기기 토글
     const toggleModal = () => {
         setModalVisible(!isModalVisible);
     };
 
+    // AsyncStorage에서 퀴즈 리스트 로드
+    useEffect(() => {
+        const loadQuizzes = async () => {
+            try {
+                const storedQuizzes = await AsyncStorage.getItem(STORAGE_KEY);
+                if (storedQuizzes) {
+                    setQuizList(JSON.parse(storedQuizzes));
+                }
+            } catch (error) {
+                console.error("Failed to load quizzes:", error);
+            }
+        };
+        loadQuizzes();
+    }, []);
+
+        // AsyncStorage에 퀴즈 리스트 저장
+        const saveQuizzes = async (quizzes) => {
+            try {
+                await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(quizzes));
+            } catch (error) {
+                console.error("Failed to save quizzes:", error);
+            }
+        };
+
     // 퀴즈 생성 핸들러
     const handleCreateQuiz = () => {
-        if (!quizName.trim() || !quizType) return; // 퀴즈 이름이나 유형이 비어있으면 추가 안 함
-        setQuizList((prevList) => [...prevList, { name: quizName, type: quizType }]); // 퀴즈 목록에 추가
+        if (!quizName.trim() || !quizType.length===0) return; // 퀴즈 이름이나 유형이 비어있으면 추가 안 함
         
+        const updatedQuizzes = [...quizList, { name: quizName, type: quizType.join(" ") }];
+        setQuizList(updatedQuizzes);
+        saveQuizzes(updatedQuizzes);
+
         //console.log("Quiz Created:", { quizName, quizType });
         setQuizName(""); // 입력 필드 초기화
-        setQuizType(""); // 유형 초기화
+        setQuizType([]); // 유형 초기화
+        setSelectedFile(null); //파일 초기화
         setModalVisible(false); // 모달 닫기
     };
 
+    // 퀴즈 삭제 핸들러
+    const handleDeleteQuiz = (index) => {
+        Alert.alert(
+            "Delete",
+            "삭제하시겠습니까?",
+            [
+                {
+                    text: "취소",
+                    style: "cancel",
+                },
+                {
+                    text: "OK",
+                    onPress: () => {
+                        const updatedQuizzes = quizList.filter((_, i) => i !== index);
+                        setQuizList(updatedQuizzes);
+                        saveQuizzes(updatedQuizzes);
+                    }
+                }
+            ],
+            {cancelable: false}
+        );
+    };
+
+  // PDF 파일 선택 핸들러
+    const handleFilePick = async () => {
+        try {
+        const result = await DocumentPicker.getDocumentAsync({
+            type: "application/pdf", // PDF 파일만 허용
+            copyToCacheDirectory: true,
+        });
+
+        if (result.type === "success") {
+            setSelectedFile(result); // 선택한 파일 저장
+        } else {
+            Alert.alert("파일 선택 취소됨");
+        }
+        } catch (error) {
+        console.error("Error picking file:", error);
+        Alert.alert("파일 선택 중 오류 발생");
+        }
+    };
+
+    // 유형 선택 핸들러
+    const handleQuizTypeToggle = (type) => {
+        if (quizType.includes(type)) {
+            setQuizType(quizType.filter((item) => item !== type)); // 이미 선택된 유형은 제거
+        } else {
+            setQuizType([...quizType, type]); // 선택되지 않은 유형은 추가
+        }
+    };
 
       return (
         <View style={styles.container}>
@@ -79,6 +165,7 @@ const FolderScreen = ({ setTapPressed }) => {
                     resizeMode="contain"
                     imageStyle={{ borderRadius: 12 }}>
                     <ScrollView contentContainerStyle={QuizListstyles.screen} style={{marginTop: 50}}>
+                        
                         {/* 퀴즈 목록 표시 */}
                         {quizList.map((quiz, index) => (
                             <View key={index} style={QuizListstyles.quizItemContainer}>
@@ -94,6 +181,9 @@ const FolderScreen = ({ setTapPressed }) => {
                                         <Text style={QuizListstyles.buttonText}>오답</Text>
                                     </TouchableOpacity>
                                     <Text style={QuizListstyles.itemScore}>{quiz.type}</Text>
+                                    <TouchableOpacity onPress={() => handleDeleteQuiz(index)}>
+                                        <AntDesign name="delete" size={30} color="#394C8B" />
+                                    </TouchableOpacity>
                                 </View>
                             </View>
                         ))}
@@ -120,29 +210,46 @@ const FolderScreen = ({ setTapPressed }) => {
                             value={quizName}
                             onChangeText={setQuizName}
                         />
+
+                        {/* PDF 파일 경로 표시 박스 */}
+                        <View style={AddQuizStyles.filePathBox}>
+                        <Text style={AddQuizStyles.filePathText}>
+                            {selectedFile ? `파일 경로: ${selectedFile.uri}` : "업로드된 PDF 파일 경로가 표시됩니다"}
+                        </Text>
+                    </View>
+
                         <View style={AddQuizStyles.radioGroup}>
                             <TouchableOpacity
-                                style={[AddQuizStyles.radioButton, quizType === "객관식" && AddQuizStyles.selectedRadioButton,]}
-                                onPress={() => setQuizType("객관식")}
+                                style={[AddQuizStyles.radioButton, quizType.includes("객관식") && AddQuizStyles.selectedRadioButton,]}
+                                onPress={() => handleQuizTypeToggle("객관식")}
                             >
-                                <Text style={[AddQuizStyles.radioText, quizType !== "객관식" && AddQuizStyles.unselectedRadioText,]}>객관식</Text>
+                                <Text style={[AddQuizStyles.radioText, !quizType.includes("객관식") && AddQuizStyles.unselectedRadioText,]}>객관식</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={[
                                     AddQuizStyles.radioButton,
-                                    quizType === "단답형" && AddQuizStyles.selectedRadioButton,
+                                    quizType.includes("단답형") && AddQuizStyles.selectedRadioButton,
                                 ]}
-                                onPress={() => setQuizType("단답형")}
+                                onPress={() => handleQuizTypeToggle("단답형")}
                             >
-                                <Text style={[AddQuizStyles.radioText, quizType !== "단답형" && AddQuizStyles.unselectedRadioText,]}>단답형</Text>
+                                <Text style={[AddQuizStyles.radioText, !quizType.includes("단답형") && AddQuizStyles.unselectedRadioText,]}>단답형</Text>
                             </TouchableOpacity>
                         </View>
-                        <TouchableOpacity
-                            style={AddQuizStyles.createButton}
-                            onPress={handleCreateQuiz}
-                        >
-                            <Text style={AddQuizStyles.createButtonText}>생성</Text>
-                        </TouchableOpacity>
+            
+            {/* PDF 업로드 버튼 */}
+            <View style={AddQuizStyles.buttonRow}>
+                <TouchableOpacity style={AddQuizStyles.uploadButton} onPress={handleFilePick}>
+                <Text style={AddQuizStyles.createButtonText}>
+                    {selectedFile ? `업로드된 파일: ${selectedFile.name}` : "PDF 업로드"}
+                </Text>
+                </TouchableOpacity>
+                            <TouchableOpacity
+                                style={AddQuizStyles.createButton}
+                                onPress={handleCreateQuiz}
+                            >
+                                <Text style={AddQuizStyles.createButtonText}>생성</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
             </Modal>

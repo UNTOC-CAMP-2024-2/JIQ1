@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "expo-document-picker": "^13.0.1",
+    "react-native-document-picker": "^9.3.1"
+  }
+}
