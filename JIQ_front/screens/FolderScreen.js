@@ -133,6 +133,30 @@ const FolderScreen = ({ setTapPressed }) => {
         }
     };
 
+    //유형에 맞는 퀴즈 화면 연결
+    const handleViewQuiz = (quiz) => {
+        
+        if (quiz.type.includes("객관식") && quiz.type.includes("단답형")){
+            Alert.alert("아직 화면 없음", "이 유형의 화면은 어케 만들지");
+        }
+        else if (quiz.type.includes("객관식")) {
+            navigation.navigate('MultipleQuiz', {
+                question: '문제 화면',
+                options: ['선지', '선지', '선지', '선지'],
+                currentPage: 1,
+                totalPage: 5,
+            });
+        }else if (quiz.type.includes("단답형")) {
+            navigation.navigate('ShortAnswerQuiz',{
+                question: '문제 화면',
+                currentPage: 1,
+                totalPage: 5,
+            });
+        }else{
+            Alert.alert("단답형 객관식이 모두 섞여있는건 아직 없음 ㅋㅋ");
+        }
+    };
+
       return (
         <View style={styles.container}>
             <StatusBar style="light" />
@@ -174,7 +198,9 @@ const FolderScreen = ({ setTapPressed }) => {
                                     <Text style={QuizListstyles.quizItemText}>{quiz.name}</Text>
                                 </View>
                                 <View style={QuizListstyles.quizItemButtons}>
-                                    <TouchableOpacity style={QuizListstyles.viewButton}>
+                                    <TouchableOpacity
+                                    style={QuizListstyles.viewButton}
+                                    onPress={() => handleViewQuiz(quiz)}>
                                         <Text style={QuizListstyles.buttonText}>문제 보기</Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity style={QuizListstyles.answerButton}>

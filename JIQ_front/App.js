@@ -5,6 +5,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from './screens/HomeScreen';
 import FolderScreen from './screens/FolderScreen';
+import MultipleQuiz from './screens/MultipleQuiz';
+import ShortAnswerQuiz from './screens/ShortAnswerQuiz';
 
 const Stack = createStackNavigator();
 
@@ -22,6 +24,10 @@ const App = () => {
             )}
           </Stack.Screen>
           <Stack.Screen name="FolderScreen" component={FolderScreen}>
+          </Stack.Screen>
+          <Stack.Screen name="MultipleQuiz" component={MultipleQuiz}>
+          </Stack.Screen>
+          <Stack.Screen name="ShortAnswerQuiz" component={ShortAnswerQuiz}>
           </Stack.Screen>
 
       </Stack.Navigator>
