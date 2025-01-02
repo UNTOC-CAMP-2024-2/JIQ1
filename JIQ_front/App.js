@@ -7,11 +7,22 @@ import HomeScreen from './screens/HomeScreen';
 import FolderScreen from './screens/FolderScreen';
 import MultipleQuiz from './screens/MultipleQuiz';
 import ShortAnswerQuiz from './screens/ShortAnswerQuiz';
+import LogoAnimation from './screens/LogoAnimation';
 
 const Stack = createStackNavigator();
 
 const App = () => {
   const [tabPressed, setTapPressed] = useState(true);
+  const [isSplashVisible, setIsSplashVisible] = useState(true);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => setIsSplashVisible(false), 4000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isSplashVisible) {
+    return <LogoAnimation />;
+  }
 
   return (
     <NavigationContainer>
