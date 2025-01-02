@@ -1,34 +1,33 @@
 import 'react-native-gesture-handler';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from './screens/HomeScreen';
 import WrongNote from './screens/WrongAsw';
+import SigninScreen from './screens/SigninScreen';
 
 const Stack = createStackNavigator();
 
 const App = () => {
-  const [tabPressed, setTapPressed] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      const token = await AsyncStorage.getItem('userToken');
+      setIsLoggedIn(!!token);
+    };
+
+    checkLoginStatus();
+  }, []);
 
   return (
     <NavigationContainer>
       <Stack.Navigator
-      initialRouteName='Home'
+      initialRouteName="Signin"
       screenOptions={{ animationEnabled: false, gestureEnabled:false }}>
-        {tabPressed ? (
-          <Stack.Screen name="Home">
-            {props => (
-              <HomeScreen {...props} tabPressed={tabPressed} setTapPressed={setTapPressed} />
-            )}
-          </Stack.Screen>
-        ) : (
-          <Stack.Screen name="WrongNote">
-            {props => (
-              <WrongNote {...props} tabPressed={tabPressed} setTapPressed={setTapPressed} />
-            )}
-          </Stack.Screen>
-        )}
+        <Stack.Screen name="Signin" component={SigninScreen}/>
+        <Stack.Screen name="Home" component={HomeScreen}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
