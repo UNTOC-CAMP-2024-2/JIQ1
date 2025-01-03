@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
         width: "100%",
         height: 70,
         marginBottom: 5,
-        
+        flexDirection: "row",
     },
     pwContainer: {
         width: "100%",

@@ -112,7 +112,8 @@ const SigninScreen = ({ navigation }) => {
         }}>
             계정이 없으신가요?
         </Text>
-        <TouchableOpacity>
+        <TouchableOpacity
+        onPress={()=>navigation.navigate('Signup')}>
         <Image 
         source = {require('../images/회원가입 버튼.png')}
         style = {{marginVertical: 5,}}/>
