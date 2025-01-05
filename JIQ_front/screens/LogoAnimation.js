@@ -1,73 +1,107 @@
-import React, { useRef, useEffect } from 'react';
-import { View, Text, Animated, Easing, StyleSheet } from 'react-native';
-import LogoAnimationStyles from './LogoAnimationStyles';
+import React, { useRef, useEffect } from "react";
+import { Animated, Text, View, StyleSheet } from "react-native";
+import LogoAnimationstyles from "./LogoAnimationStyles";
 
 const LogoAnimation = () => {
-  const translateY = useRef(new Animated.Value(-200)).current; // Start above the screen
-  const bounceValue = useRef(new Animated.Value(1)).current; // For bounce scaling effect
+  // 애니메이션 값 초기화
+  const fadeJ = useRef(new Animated.Value(0)).current;
+  const fadeI = useRef(new Animated.Value(0)).current;
+  const fadeQ = useRef(new Animated.Value(0)).current;
+
+  const translateJ = useRef(new Animated.Value(-100)).current;
+  const translateI = useRef(new Animated.Value(0)).current;
+  const translateQ = useRef(new Animated.Value(100)).current;
+
+  
 
   useEffect(() => {
+    // 애니메이션 순차 실행
     Animated.sequence([
-      //로고 모션 조절하는 부분
-      Animated.timing(translateY, {
-        toValue: 0, // 중앙 위치
-        duration: 800,
-        easing: Easing.bezier(0.1,0.9,0.2,1),
-        useNativeDriver: true,
-      }),
-      Animated.spring(translateY, {
-        toValue: -50,
-        friction: 2,
-        tension: 120,
-        useNativeDriver: true,
-      }),
-      Animated.spring(translateY, {
-        toValue: 0,
-        friction: 5,
-        tension: 60,
-        useNativeDriver: true,
-      }),
-      //bouncing effect
-      Animated.spring(bounceValue, {
-        toValue: 1.3, // Slightly larger scale
-        friction: 2, // Bounce effect
-        tension: 150,
-        useNativeDriver: true,
-      }),
-      Animated.spring(bounceValue, {
-        toValue: 1, // Return to original size
-        friction: 3,
-        tension: 50,
-        useNativeDriver: true,
-      }),
+      // J 애니메이션
+      Animated.parallel([
+        Animated.timing(fadeJ, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(translateJ, {
+          toValue: 0,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ]),
+      // I 애니메이션
+      Animated.parallel([
+        Animated.timing(fadeI, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(translateI, {
+          toValue: 0,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ]),
+      // Q 애니메이션
+      Animated.parallel([
+        Animated.timing(fadeQ, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(translateQ, {
+          toValue: 0,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ]),
     ]).start();
-
-    translateY.addListener(({value}) => console.log('translateY:', value));
-    bounceValue.addListener(({value}) => console.log('bounceValue:', value));
-
-    return () => {
-        translateY.removeAllListeners();
-        bounceValue.removeAllListeners();
-    };
-  }, [translateY, bounceValue]);
-
-
+  }, [fadeJ, fadeI, fadeQ, translateJ, translateI, translateQ]);
 
   return (
-    <View style={LogoAnimationStyles.container}>
-      <Animated.View
-        style={{
-          transform: [
-            { translateY: translateY },
-            { scale: bounceValue },
-          ],
-        }}
+    <View style={LogoAnimationstyles.container}>
+      {/* J 애니메이션 */}
+      <Animated.Text
+        style={[
+          LogoAnimationstyles.text,
+          {
+            opacity: fadeJ,
+            transform: [{ translateX: translateJ }],
+          },
+        ]}
       >
-        <Text
-        style={LogoAnimationStyles.logo}>JIQ</Text>
-      </Animated.View>
+        J
+      </Animated.Text>
+
+      {/* I 애니메이션 */}
+      <Animated.Text
+        style={[
+          LogoAnimationstyles.text,
+          {
+            opacity: fadeI,
+            transform: [{ translateX: translateI }],
+          },
+        ]}
+      >
+        I
+      </Animated.Text>
+
+      {/* Q 애니메이션 */}
+      <Animated.Text
+        style={[
+          LogoAnimationstyles.text,
+          {
+            opacity: fadeQ,
+            transform: [{ translateX: translateQ }],
+          },
+        ]}
+      >
+      <Text style={[LogoAnimationstyles.text, /*LogoAnimationstyles.qText*/]}>Q</Text>
+      </Animated.Text>
     </View>
   );
 };
 
-export default LogoAnimation
+
+export default LogoAnimation;
