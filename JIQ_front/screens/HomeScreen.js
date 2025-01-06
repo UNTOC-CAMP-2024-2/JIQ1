@@ -155,7 +155,7 @@ const HomeScreen = ({ setTapPressed }) => {
                     style={styles.screen}
                     resizeMode="contain"
                     imageStyle={{ borderRadius: 12 }}>
-                    <ScrollView contentContainerStyle={styles.scrollContainer}>
+                    <ScrollView contentContainerStyle={styles.scrollContainer} style={{marginTop: 40,}}>
                         <View style={styles.row}>
                             {Object.keys(folders).map((key) => (
                                 <View key={key} style={{ flexDirection: "column", justifyContent: "center", alignItems: "center", paddingVertical: 10 }}>
