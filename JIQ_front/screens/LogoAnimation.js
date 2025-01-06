@@ -12,7 +12,6 @@ const LogoAnimation = () => {
   const translateI = useRef(new Animated.Value(0)).current;
   const translateQ = useRef(new Animated.Value(100)).current;
 
-  
 
   useEffect(() => {
     // 애니메이션 순차 실행
