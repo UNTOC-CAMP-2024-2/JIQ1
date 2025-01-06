@@ -89,7 +89,8 @@ const SigninScreen = ({ navigation }) => {
                     marginTop: 0,}}>
                 비밀번호를 잊으셨나요?
             </Text>
-            <TouchableOpacity>
+            <TouchableOpacity
+            onPress={()=>navigation.navigate('FindPW')}>
                 <Text 
                 style={{color: "#4448BB",
                         fontSize: 16,
