@@ -41,6 +41,12 @@ const FolderScreen = ({ setTapPressed }) => {
 
     // 모달 표시/숨기기 토글
     const toggleModal = () => {
+        if (isModalVisible) {
+            // 모달이 닫힐 때 상태 초기화
+            setQuizName(""); // 퀴즈 이름 초기화
+            setQuizType([]); // 퀴즈 유형 초기화
+            setSelectedFile(null); // 파일 초기화
+        }
         setModalVisible(!isModalVisible);
     };
 
@@ -70,8 +76,11 @@ const FolderScreen = ({ setTapPressed }) => {
 
     // 퀴즈 생성 핸들러
     const handleCreateQuiz = () => {
-        if (!quizName.trim() || !quizType.length===0) return; // 퀴즈 이름이나 유형이 비어있으면 추가 안 함
-        
+        if (!quizName.trim() || !quizType.length===0){
+            Alert.alert("생성불가", "퀴즞 이름과 유형을 선택해주세요.");
+            return;
+        } // 퀴즈 이름이나 유형이 비어있으면 추가 안 함
+            
         const updatedQuizzes = [...quizList, { name: quizName, type: quizType.join(" ") }];
         setQuizList(updatedQuizzes);
         saveQuizzes(updatedQuizzes);
@@ -127,6 +136,17 @@ const FolderScreen = ({ setTapPressed }) => {
 
     // 유형 선택 핸들러
     const handleQuizTypeToggle = (type) => {
+        if (quizType.includes("객관식") && type === "단답형") {
+            Alert.alert("경고", "객관식과 단답형을 동시에 선택할 수 없습니다.");
+            return; // 함수 종료
+        }
+    
+        if (quizType.includes("단답형") && type === "객관식") {
+            Alert.alert("경고", "객관식과 단답형을 동시에 선택할 수 없습니다.");
+            return; // 함수 종료
+        }      
+        
+        
         if (quizType.includes(type)) {
             setQuizType(quizType.filter((item) => item !== type)); // 이미 선택된 유형은 제거
         } else {

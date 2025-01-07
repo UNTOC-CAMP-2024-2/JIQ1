@@ -10,6 +10,7 @@ const MultipleQuiz = ({ route }) => {
 
     const [pageIndex, setPageIndex] = useState(currentPage - 1);
 
+    //퀴즈 더 추가할려면 여기에 question 더 추가하면 됨
     const [quizData, setQuizData] = useState([
         {
             question: "문제 1: 다음 중 올바른 문법은?",
