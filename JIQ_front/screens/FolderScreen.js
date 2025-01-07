@@ -125,33 +125,20 @@ const FolderScreen = ({ setTapPressed }) => {
         }
     };
 
-// 유형 선택 핸들러
-const handleQuizTypeToggle = (type) => {
-    if (quizType.includes(type)) {
-        // 이미 선택된 유형을 다시 누르면 제거
-        setQuizType(quizType.filter((item) => item !== type));
-    } else {
-        // 다른 유형이 이미 선택되어 있으면 알림
-        if (quizType.length > 0) {
-            Alert.alert("유형 선택 제한", "객관식과 단답형을 동시에 선택할 수 없습니다.");
+    // 유형 선택 핸들러
+    const handleQuizTypeToggle = (type) => {
+        if (quizType.includes(type)) {
+            setQuizType(quizType.filter((item) => item !== type)); // 이미 선택된 유형은 제거
         } else {
-            // 선택되지 않은 유형은 추가
-            setQuizType([...quizType, type]);
+            setQuizType([...quizType, type]); // 선택되지 않은 유형은 추가
         }
-    }
-};
-
+    };
 
     //유형에 맞는 퀴즈 화면 연결
     const handleViewQuiz = (quiz) => {
         
-        if (quiz.type.includes("객관식") && quiz.type.includes("단답형")){
-            Alert.alert("아직 화면 없음", "이 유형의 화면은 어케 만들지");
-        }
-        else if (quiz.type.includes("객관식")) {
+        if (quiz.type.includes("객관식")) {
             navigation.navigate('MultipleQuiz', {
-                question: '문제 화면',
-                options: ['선지', '선지', '선지', '선지'],
                 currentPage: 1,
                 totalPage: 5,
             });

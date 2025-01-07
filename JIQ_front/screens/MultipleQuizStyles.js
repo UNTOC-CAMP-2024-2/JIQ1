@@ -65,26 +65,40 @@ const MultipleQuizStyles = StyleSheet.create({
       justifyContent: 'space-between',
       alignItems: 'center',
     },
-    pageText: {
-      fontSize: 30,
-      color: '#cac8c8',
-      textAlign: 'center',
-      flex: 1, //공간차지하게 해서 가운데로 얘만 위치하게 함
-      fontWeight: 'bold'
+    navigationButtons: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",     
+  },
+    navButton: {
+        justifyContent: "center",
+        alignItems: "center",
     },
-    nextButton: {
-      backgroundColor: '#e5f0ff',
-      borderRadius: 50,
-      padding: 12,
-      shadowColor: '#000',
-      shadowOffset: {width:1, height:2},
-      shadowOpacity: 0.3,
-      shadowRadius: 3,
+    disabledButton: {
+        backgroundColor: "#d3d3d3",
     },
-    nextText: {
-      fontSize: 18,
-      color: '#394c8b',
+      resultButton: {
+        backgroundColor: "#394C8B",
+        paddingVertical: 10,
+        paddingHorizontal: 30,
+        borderRadius: 10,
     },
+      resultButtonText: {
+        color: "#fff",
+        fontSize: 16,
+        fontWeight: "bold",
+    },
+    pageIndicatorText: {
+      fontSize: 28, 
+      color: "#394C8B", 
+      textAlign: "center",
+      opacity: 0.8,
+  },
+  backButton: {
+    top: -5,
+    opacity: 0.8,
+  }
+  
   });
   
 export default MultipleQuizStyles;
