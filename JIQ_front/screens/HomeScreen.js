@@ -254,9 +254,16 @@ const HomeScreen = ({ setTapPressed }) => {
                 <KeyboardAvoidingView style={styles.modalContainer} behavior={Platform.OS === "ios" ? "padding" : "height"}>
                     <View style={styles.modal}>
                         <View style={styles.modalscreen}>
-                            <View flexDirection="row" width="80%" alignItems="center" justifyContent="center">
+                            <View alignItems="flex-end" width="100%">
+                            <TouchableOpacity
+                                onPress={closenameModal}>
+                                <Feather name="x" size={24} color="black" marginHorizontal="30" />
+                            </TouchableOpacity>
+                            </View>
+                            <View flexDirection="row" width="87%" alignItems="center" justifyContent="center">
                                 <AntDesign name="addfolder" size={40} color={"#394C8B"} />
                                 <Text style={{...styles.modalText, fontSize: 35, color: "#394C8B"}}>새로운 폴더</Text>
+                                
                             </View>
                             <View flexDirection="row" justifyContent="flex-start" alignItems="center">
                                 <Feather name="folder" size={235} color="#394C8B" />
