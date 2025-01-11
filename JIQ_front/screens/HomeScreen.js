@@ -23,7 +23,10 @@ import { useNavigation } from "@react-navigation/native";
 import { theme } from "../Colors";
 import styles from "./HomeScreenStyles";
 
+import axios from 'axios'; //벡엔드와 통신신
+
 const STORAGE_KEY = "@folders";
+
 
 const HomeScreen = ({ setTapPressed }) => {
     const navigation = useNavigation();
@@ -52,7 +55,7 @@ const HomeScreen = ({ setTapPressed }) => {
               };
         }, []);
 
-    const addFolderModal = () => {
+    const addFolderModal = async () => {
         setNameModal(true);
     };
 
@@ -84,14 +87,41 @@ const HomeScreen = ({ setTapPressed }) => {
     };
 
     const addFolder = async() => {
-        const folderName = name === "" ? "제목 없음" : name; // 기본값 설정
+        if(!name.trim()) {
+            Alert.alert("오류", "폴더 이름을 입력해주세요.");
+            return;
+        }
+        
+        const folderName = name.trim(); //폴더 이름 정리
+        
+    try {
+            //벡엔드로 폴더 생성 요청
+            const response = await axios.post("http://34.168.167.128:8000//folder/folder/", {
+                folder_name: folderName, //폴더 이름 전달달
+            });
+        
+
+        const {folder_id, folder_name} = response.data; //folder_id 와 folder_name 받기
+        
+        const newFolder = {id: folder_id, name:folder_name};
+        setFolders([...folders, newFolder]); //새로운 폴더 추가
+        console.log("폴더 생성 성공:", newFolder);
+       }catch(error) {
+        //오류 처리
+        console.error("폴더 생성 실패:", error.response?.data || error.message);
+        Alert.alert("오류", "폴더 생성에 실패했습니다.");
+       }finally {
+        //항상 실행되는 코드
+        setName("");
+        setNameModal(false);
+       }
         const newFolders = {
             ...folders,
             [Date.now()]: { name: folderName }, // 객체 구조 확인
         };
-        setFolders(newFolders);
+        /*setFolders(newFolders);
         await saveFolders(newFolders);
-        setName("");
+        setName("");*/
     };
 
     const deleteFolder = (key) => {
