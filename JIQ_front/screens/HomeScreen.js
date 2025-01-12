@@ -55,7 +55,7 @@ const HomeScreen = ({ setTapPressed }) => {
               };
         }, []);
 
-    const addFolderModal = async () => {
+    const addFolderModal = () => {
         setNameModal(true);
     };
 
@@ -87,42 +87,53 @@ const HomeScreen = ({ setTapPressed }) => {
     };
 
     const addFolder = async() => {
-        if(!name.trim()) {
+        if (!name.trim()) {
             Alert.alert("오류", "폴더 이름을 입력해주세요.");
             return;
         }
-        
-        const folderName = name.trim(); //폴더 이름 정리
-        
-    try {
-            //벡엔드로 폴더 생성 요청
-            const response = await axios.post("http://34.168.167.128:8000//folder/folder/", {
-                folder_name: folderName, //폴더 이름 전달달
-            });
-        
+        const folderName = name.trim(); // 폴더 이름 정리
+        const userId = 1;//테스트용 아이디디
 
-        const {folder_id, folder_name} = response.data; //folder_id 와 folder_name 받기
+        try {
+            // 백엔드로 폴더 생성 요청
+            const response = await axios.post("http://34.168.167.128:8000/folder/folder/", {
+                folder_name: folderName, // 폴더 이름 전달
+                user_id: userId,
+            });
+    
+            const { folder_id, folder_name } = response.data; // 백엔드에서 폴더 ID와 이름 반환
+    
+            // 새로운 폴더를 로컬 상태에 추가
+            const newFolders = {
+                ...folders,
+                [folder_id]: { name: folder_name }, // 백엔드에서 받은 ID 사용
+            };
+            setFolders(newFolders);
+    
+            // 성공 메시지 출력
+            console.log("폴더 생성 성공:", newFolders);
+        } catch (error) {
+            // 오류 처리
+            console.error("폴더 생성 실패:", error.response?.data || error.message);
+            Alert.alert("오류", "폴더 생성에 실패했습니다.");
+        } finally {
+            // 상태 초기화
+            setName("");
+            setNameModal(false);
+        }
         
-        const newFolder = {id: folder_id, name:folder_name};
-        setFolders([...folders, newFolder]); //새로운 폴더 추가
-        console.log("폴더 생성 성공:", newFolder);
-       }catch(error) {
-        //오류 처리
-        console.error("폴더 생성 실패:", error.response?.data || error.message);
-        Alert.alert("오류", "폴더 생성에 실패했습니다.");
-       }finally {
-        //항상 실행되는 코드
-        setName("");
-        setNameModal(false);
-       }
+        {/*백엔드 코드 추가 전 원래 코드*/}
+        /*const folderName = name === "" ? "제목 없음" : name; // 기본값 설정
         const newFolders = {
             ...folders,
             [Date.now()]: { name: folderName }, // 객체 구조 확인
         };
-        /*setFolders(newFolders);
-        await saveFolders(newFolders);
+        setFolders(newFolders);
         setName("");*/
     };
+
+
+
 
     const deleteFolder = (key) => {
         Alert.alert("폴더 삭제", "폴더를 삭제하시겠습니까?", [
