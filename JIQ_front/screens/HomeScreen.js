@@ -34,7 +34,7 @@ const HomeScreen = ({ setTapPressed }) => {
     const [nameModal, setNameModal] = useState(false);
     const [fileModal, setFileModal] = useState(false);
     const [name, setName] = useState("");
-    const [folders, setFolders] = useState({});
+    const [folders, setFolders] = useState([]);
     const [selectedFolderKey, setSelectedFolderKey] = useState(null); // 선택된 폴더 키 상태 추가
     const [isKetboardVisible, setKeyboardVisible] = useState(false);
 
@@ -77,7 +77,11 @@ const HomeScreen = ({ setTapPressed }) => {
     const onChangeText = (payload) => setName(payload);
 
     const saveFolders = async(toSave) => {
-        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+        try {
+            await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+        } catch (error) {
+            console.error("폴더 저장 실패:", error);
+        }
     };
 
     const loadFolders = async() => {
@@ -85,51 +89,61 @@ const HomeScreen = ({ setTapPressed }) => {
         const loadedFolders = JSON.parse(s);
         setFolders(loadedFolders || {});
     };
-
+    
     const addFolder = async() => {
         if (!name.trim()) {
             Alert.alert("오류", "폴더 이름을 입력해주세요.");
             return;
         }
         const folderName = name.trim(); // 폴더 이름 정리
-        const userId = 1;//테스트용 아이디디
 
         try {
-            // 백엔드로 폴더 생성 요청
-            const response = await axios.post("http://34.168.167.128:8000/folder/folder/", {
-                folder_name: folderName, // 폴더 이름 전달
-                user_id: userId,
+            const response = await axios.post("http://34.168.167.128:8000/folder/folder/create", {
+                folder_name: folderName,
             });
-    
-            const { folder_id, folder_name } = response.data; // 백엔드에서 폴더 ID와 이름 반환
-    
-            // 새로운 폴더를 로컬 상태에 추가
-            const newFolders = {
+
+            const newFolder = response.data;
+            console.log("폴더 생성 성공:", newFolder);
+
+            const updatedFolders = {
                 ...folders,
-                [folder_id]: { name: folder_name }, // 백엔드에서 받은 ID 사용
+                [newFolder.id]: { name: newFolder.folder_name },
             };
-            setFolders(newFolders);
-    
-            // 성공 메시지 출력
-            console.log("폴더 생성 성공:", newFolders);
+
+            setFolders(updatedFolders);
+            await saveFolders(updatedFolders); // AsyncStorage에 저장
         } catch (error) {
-            // 오류 처리
-            console.error("폴더 생성 실패:", error.response?.data || error.message);
-            Alert.alert("오류", "폴더 생성에 실패했습니다.");
+            console.error("폴더 이름 백엔드 저장 실패:", error.response?.data || error.message);
+            Alert.alert("백엔드 오류", "폴더 이름을 저장하지 못했습니다.");
         } finally {
-            // 상태 초기화
             setName("");
             setNameModal(false);
         }
-        
-        {/*백엔드 코드 추가 전 원래 코드*/}
-        /*const folderName = name === "" ? "제목 없음" : name; // 기본값 설정
+
+
+        /*const folderId = Date.now(); // 임시 폴더 ID (프론트엔드에서만 사용)
+
+        // 1. 폴더를 프론트엔드에 생성
         const newFolders = {
             ...folders,
-            [Date.now()]: { name: folderName }, // 객체 구조 확인
+            [folderId]: { name: folderName }, // 로컬에 폴더 추가
         };
         setFolders(newFolders);
-        setName("");*/
+    
+        // 2. 백엔드에 폴더 이름 전달
+        try {
+            const response = await axios.post("http://34.168.167.128:8000/folder/folder/create", {
+                folder_name: folderName, // 백엔드로 이름 전달
+            });
+            console.log("폴더 생성 성공:", response.data);
+        } catch (error) {
+            console.error("폴더 이름 백엔드 저장 실패:", error.response?.data || error.message);
+            Alert.alert("백엔드 오류", "폴더 이름을 저장하지 못했습니다.");
+        } finally {
+            setName(""); // 입력 필드 초기화
+            setNameModal(false); // 모달 닫기
+        }*/
+        
     };
 
 
