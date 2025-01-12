@@ -105,16 +105,16 @@ const HomeScreen = ({ setTapPressed }) => {
             const newFolder = response.data;
             console.log("폴더 생성 성공:", newFolder);
 
+
             const updatedFolders = {
                 ...folders,
-                [newFolder.id]: { name: newFolder.folder_name },
+                [newFolder.folder_id]: { name: newFolder.folder_name },
             };
 
             setFolders(updatedFolders);
-            await saveFolders(updatedFolders); // AsyncStorage에 저장
+            await saveFolders(updatedFolders); // AsyncStorage에 저장  
         } catch (error) {
-            console.error("폴더 이름 백엔드 저장 실패:", error.response?.data || error.message);
-            Alert.alert("백엔드 오류", "폴더 이름을 저장하지 못했습니다.");
+            console.error("폴더 이름 백엔드 저장 실패:", error.response?.data || error.message);                Alert.alert("백엔드 오류", "폴더 이름을 저장하지 못했습니다.");
         } finally {
             setName("");
             setNameModal(false);
@@ -214,7 +214,7 @@ const HomeScreen = ({ setTapPressed }) => {
                         <View style={styles.row}>
                             {Object.keys(folders).map((key) => (
                                 <View key={key} style={{ flexDirection: "column", justifyContent: "center", alignItems: "center", paddingVertical: 10 }}>
-                                    <TouchableOpacity onPress={()=> navigation.navigate("FolderScreen", {folderName:folders[key]?.name, folderKey: key})}>
+                                    <TouchableOpacity onPress={()=> navigation.navigate("FolderScreen", {folderName:folders[key]?.name, folderId: key})}>
                                         <Image 
                                             source={require('../images/Folder Open 01.png')}
                                             style={styles.Icon} />

@@ -51,59 +51,60 @@ const FolderScreen = ({ setTapPressed }) => {
     useEffect(() => {
         const loadQuizzes = async () => {
             try {
-                const storedQuizzes = await AsyncStorage.getItem(STORAGE_KEY);
+                const folderId = route.params?.folderId; // 현재 폴더의 ID
+                const storedQuizzes = await AsyncStorage.getItem(`${STORAGE_KEY}_${folderId}`);
                 if (storedQuizzes) {
-                    const quizzes = JSON.parse(storedQuizzes);
-                    // 현재 폴더 ID에 해당하는 퀴즈만 필터링
-                    const filteredQuizzes = quizzes.filter(
-                        (quiz) => quiz.folderId === route.params.folderKey
-                    );
-                    setQuizList(filteredQuizzes);
-                    //setQuizList(JSON.parse(storedQuizzes));
+                    setQuizList(JSON.parse(storedQuizzes));
+                } else {
+                    setQuizList([]); // 폴더가 비어 있으면 초기화
                 }
             } catch (error) {
                 console.error("Failed to load quizzes:", error);
             }
         };
         loadQuizzes();
-    }, [route.params.folderKey]);
+    }, [route.params?.folderId]);
 
-        // AsyncStorage에 퀴즈 리스트 저장
-        const saveQuizzes = async (quizzes) => {
-            try {
-                await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(quizzes));
-            } catch (error) {
-                console.error("Failed to save quizzes:", error);
+    // AsyncStorage에 퀴즈 리스트 저장
+    const saveQuizzes = async (quizzes) => {
+        try {
+            const folderId = route.params?.folderId; // 현재 폴더 ID
+            if (!folderId) {
+                console.error("Folder ID is missing");
+                return;
             }
-        };
+            await AsyncStorage.setItem(`${STORAGE_KEY}_${folderId}`, JSON.stringify(quizzes));
+        } catch (error) {
+            console.error("Failed to save quizzes:", error);
+        }
+    };
 
     // 퀴즈 생성 핸들러
     const handleCreateQuiz = () => {
         if (!quizName.trim() || !quizType.length===0){
-            Alert.alert("생성불가", "퀴즞 이름과 유형을 선택해주세요.");
+            Alert.alert("생성불가", "퀴즈 이름과 유형을 선택해주세요.");
             return;
         } // 퀴즈 이름이나 유형이 비어있으면 추가 안 함
-            
-        const updatedQuizzes = [
-            ...quizList,
-            {
-                name: quizName,
-                type: quizType.join(" "),
-                folderId: route.params.folderKey, // 현재 폴더 ID 추가
-            },
-        ];
-        setQuizList(updatedQuizzes);
-        saveQuizzes(updatedQuizzes);   
+        
+        const updatedQuizzes = [...quizList, { name: quizName, type: quizType.join(" ") }];
+        setQuizList(updatedQuizzes); // 상태 업데이트
+        saveQuizzes(updatedQuizzes); // AsyncStorage에 저장
+    
+        setQuizName(""); // 초기화
+        setQuizType([]);
+        setModalVisible(false);
+
+    };
         /*const updatedQuizzes = [...quizList, { name: quizName, type: quizType.join(" ") }];
         setQuizList(updatedQuizzes);
         saveQuizzes(updatedQuizzes);*/
 
         //console.log("Quiz Created:", { quizName, quizType });
-        setQuizName(""); // 입력 필드 초기화
+        /*setQuizName(""); // 입력 필드 초기화
         setQuizType([]); // 유형 초기화
         setSelectedFile(null); //파일 초기화
-        setModalVisible(false); // 모달 닫기
-    };
+        setModalVisible(false); // 모달 닫기*/
+
 
     // 퀴즈 삭제 핸들러
     const handleDeleteQuiz = (index) => {
