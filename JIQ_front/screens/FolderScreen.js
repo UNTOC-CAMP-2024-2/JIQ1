@@ -29,9 +29,6 @@ const FolderScreen = ({ setTapPressed }) => {
     const route = useRoute();
     const folderName = route.params?.folderName;
 
-    const [isObjective, setIsObjective] = useState(false);
-    const [isSubjective, setIsSubjective] = useState(false);
-
     const [isModalVisible, setModalVisible] = useState(false);
     const [quizName, setQuizName] = useState(""); // 퀴즈 이름 상태
     const [quizType, setQuizType] = useState([]); // 퀴즈 유형 상태
@@ -56,14 +53,20 @@ const FolderScreen = ({ setTapPressed }) => {
             try {
                 const storedQuizzes = await AsyncStorage.getItem(STORAGE_KEY);
                 if (storedQuizzes) {
-                    setQuizList(JSON.parse(storedQuizzes));
+                    const quizzes = JSON.parse(storedQuizzes);
+                    // 현재 폴더 ID에 해당하는 퀴즈만 필터링
+                    const filteredQuizzes = quizzes.filter(
+                        (quiz) => quiz.folderId === route.params.folderKey
+                    );
+                    setQuizList(filteredQuizzes);
+                    //setQuizList(JSON.parse(storedQuizzes));
                 }
             } catch (error) {
                 console.error("Failed to load quizzes:", error);
             }
         };
         loadQuizzes();
-    }, []);
+    }, [route.params.folderKey]);
 
         // AsyncStorage에 퀴즈 리스트 저장
         const saveQuizzes = async (quizzes) => {
@@ -81,9 +84,19 @@ const FolderScreen = ({ setTapPressed }) => {
             return;
         } // 퀴즈 이름이나 유형이 비어있으면 추가 안 함
             
-        const updatedQuizzes = [...quizList, { name: quizName, type: quizType.join(" ") }];
+        const updatedQuizzes = [
+            ...quizList,
+            {
+                name: quizName,
+                type: quizType.join(" "),
+                folderId: route.params.folderKey, // 현재 폴더 ID 추가
+            },
+        ];
         setQuizList(updatedQuizzes);
-        saveQuizzes(updatedQuizzes);
+        saveQuizzes(updatedQuizzes);   
+        /*const updatedQuizzes = [...quizList, { name: quizName, type: quizType.join(" ") }];
+        setQuizList(updatedQuizzes);
+        saveQuizzes(updatedQuizzes);*/
 
         //console.log("Quiz Created:", { quizName, quizType });
         setQuizName(""); // 입력 필드 초기화
