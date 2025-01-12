@@ -8,11 +8,11 @@ import FolderScreen from './screens/FolderScreen';
 import MultipleQuiz from './screens/MultipleQuiz';
 import ShortAnswerQuiz from './screens/ShortAnswerQuiz';
 import LogoAnimation from './screens/LogoAnimation';
+import WrongScreen from './screens/WrongScreen';
 
 const Stack = createStackNavigator();
 
 const App = () => {
-  const [tabPressed, setTapPressed] = useState(true);
   const [isSplashVisible, setIsSplashVisible] = useState(true);
 
   React.useEffect(() => {
@@ -29,18 +29,15 @@ const App = () => {
       <Stack.Navigator
       initialRouteName='Home'
       screenOptions={{ animationEnabled: false, gestureEnabled:false }}>
-          <Stack.Screen name="Home">
-            {props => (
-              <HomeScreen {...props} tabPressed={tabPressed} setTapPressed={setTapPressed} />
-            )}
-          </Stack.Screen>
+          <Stack.Screen name="Home" component = {HomeScreen}></Stack.Screen> 
           <Stack.Screen name="FolderScreen" component={FolderScreen}>
+          </Stack.Screen>
+          <Stack.Screen name="WrongScreen" component={WrongScreen}>
           </Stack.Screen>
           <Stack.Screen name="MultipleQuiz" component={MultipleQuiz}>
           </Stack.Screen>
           <Stack.Screen name="ShortAnswerQuiz" component={ShortAnswerQuiz}>
           </Stack.Screen>
-
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -240,6 +240,15 @@ const styles = StyleSheet.create({
         fontSize: 20,
         textAlign: "center",
         fontWeight: 300,
+    },
+    button: {
+        padding: 10,
+        margin: 5,
+    },
+    iconBackground: {
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 5,
     }
 });
 

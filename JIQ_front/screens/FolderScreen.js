@@ -24,7 +24,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 
 const STORAGE_KEY = "@quizList";
 
-const FolderScreen = ({ setTapPressed }) => {
+const FolderScreen = ({  }) => {
     const navigation = useNavigation();
     const route = useRoute();
     const folderName = route.params?.folderName;
@@ -219,7 +219,9 @@ const FolderScreen = ({ setTapPressed }) => {
                                     onPress={() => handleViewQuiz(quiz)}>
                                         <Text style={QuizListstyles.buttonText}>문제 보기</Text>
                                     </TouchableOpacity>
-                                    <TouchableOpacity style={QuizListstyles.answerButton}>
+                                    <TouchableOpacity 
+                                    onPress={() => navigation.navigate('WrongScreen')}
+                                    style={QuizListstyles.answerButton}>
                                         <Text style={QuizListstyles.buttonText}>오답</Text>
                                     </TouchableOpacity>
                                     <Text style={QuizListstyles.itemScore}>{quiz.type}</Text>
