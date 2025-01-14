@@ -42,6 +42,7 @@ const WrongScreen = () => {
     const [strokeColor, setStrokeColor] = useState("#000000"); // 선 색깔
     const [isEraser, setIsEraser] = useState(false); // 지우개 모드
     const [currentPage, setCurrentPage] = useState(0); // 현재 페이지 인덱스
+    const [undoStacks, setUndoStacks] = useState(Array(wrongData.length).fill().map(() => []));
 
     useEffect(() => {
         loadPaths();
@@ -160,6 +161,36 @@ const WrongScreen = () => {
         },
     });
 
+    const handleUndo = () => {
+        const updatedPaths = [...paths];
+        if(updatedPaths[currentPage].length > 0) {
+            const lastPath = updatedPaths[currentPage].pop();
+            setUndoStacks((prevStacks) => {
+                const newStacks = [...prevStacks];
+                newStacks[currentPage].push(lastPath);
+                return newStacks;
+            })
+            setPaths(updatedPaths);
+            handlePathsChange(updatedPaths[currentPage]);
+            savePaths(updatedPaths);
+        }
+    };
+
+    const handleRedo = () => {
+        if (undoStacks[currentPage].length > 0) {
+            const lastUndonePath = undoStacks[currentPage].pop();
+            const updatedPaths = [...paths];
+            updatedPaths[currentPage].push(lastUndonePath); // 복구된 경로 페이지에 추가
+            setPaths(updatedPaths);
+            setUndoStacks((prevStacks) => {
+                const newStacks = [...prevStacks];
+                newStacks[currentPage] = [...newStacks[currentPage]];
+                return newStacks;
+            });
+            savePaths(updatedPaths); // 저장 
+        }
+    };
+
     const handleResult = () => {
         // Result 버튼을 눌렀을 때 동작
         Alert.alert("오답 완료", "모든 오답을 완료했습니다!");
@@ -251,10 +282,10 @@ const WrongScreen = () => {
                     onValueChange={(value) => setStrokeWidth(value)}/>
                     </View>
                     <View style={styles.doUndo}>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={handleUndo}>
                         <Feather name="corner-up-left" size={24} color="black" style={{margin: 5}}/>
                     </TouchableOpacity>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={handleRedo}>
                         <Feather name="corner-up-right" size={24} color="black" style={{margin: 5}}/>
                     </TouchableOpacity>
                     <TouchableOpacity
