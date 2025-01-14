@@ -23,7 +23,7 @@ import { useNavigation } from "@react-navigation/native";
 import { theme } from "../Colors";
 import styles from "./HomeScreenStyles";
 
-import axios from 'axios'; //벡엔드와 통신신
+import axios from 'axios'; //벡엔드와 통신
 
 const STORAGE_KEY = "@folders";
 
@@ -114,40 +114,13 @@ const HomeScreen = ({ setTapPressed }) => {
             setFolders(updatedFolders);
             await saveFolders(updatedFolders); // AsyncStorage에 저장  
         } catch (error) {
-            console.error("폴더 이름 백엔드 저장 실패:", error.response?.data || error.message);                Alert.alert("백엔드 오류", "폴더 이름을 저장하지 못했습니다.");
+            console.error("폴더 이름 백엔드 저장 실패:", error.response?.data || error.message);                
+            Alert.alert("백엔드 오류", "폴더 이름을 저장하지 못했습니다.");
         } finally {
             setName("");
             setNameModal(false);
-        }
-
-
-        /*const folderId = Date.now(); // 임시 폴더 ID (프론트엔드에서만 사용)
-
-        // 1. 폴더를 프론트엔드에 생성
-        const newFolders = {
-            ...folders,
-            [folderId]: { name: folderName }, // 로컬에 폴더 추가
-        };
-        setFolders(newFolders);
-    
-        // 2. 백엔드에 폴더 이름 전달
-        try {
-            const response = await axios.post("http://34.168.167.128:8000/folder/folder/create", {
-                folder_name: folderName, // 백엔드로 이름 전달
-            });
-            console.log("폴더 생성 성공:", response.data);
-        } catch (error) {
-            console.error("폴더 이름 백엔드 저장 실패:", error.response?.data || error.message);
-            Alert.alert("백엔드 오류", "폴더 이름을 저장하지 못했습니다.");
-        } finally {
-            setName(""); // 입력 필드 초기화
-            setNameModal(false); // 모달 닫기
-        }*/
-        
+        }        
     };
-
-
-
 
     const deleteFolder = (key) => {
         Alert.alert("폴더 삭제", "폴더를 삭제하시겠습니까?", [
