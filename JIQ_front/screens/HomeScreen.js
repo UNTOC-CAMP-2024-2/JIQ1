@@ -98,7 +98,7 @@ const HomeScreen = ({ setTapPressed }) => {
         const folderName = name.trim(); // 폴더 이름 정리
 
         try {
-            const response = await axios.post("http://34.168.167.128:8000/folder/folder/create", {
+            const response = await axios.post("http://34.83.186.210:8000/folder/folder/create", {
                 folder_name: folderName,
             });
 
@@ -121,9 +121,6 @@ const HomeScreen = ({ setTapPressed }) => {
         }
         
     };
-
-
-
 
     const deleteFolder = (key) => {
         Alert.alert("폴더 삭제", "폴더를 삭제하시겠습니까?", [
@@ -190,7 +187,15 @@ const HomeScreen = ({ setTapPressed }) => {
                         <View style={styles.row}>
                             {Object.keys(folders).map((key) => (
                                 <View key={key} style={{ flexDirection: "column", justifyContent: "center", alignItems: "center", paddingVertical: 10 }}>
-                                    <TouchableOpacity onPress={()=> navigation.navigate("FolderScreen", {folderName:folders[key]?.name, folderKey: key})}>
+                                    <TouchableOpacity onPress={()=> {
+                                        const folderId = key;
+                                        const folderName = folders[key]?.name;
+                                        if (!folderId) {
+                                            Alert.alert("오류", "폴더 ID가 없습니다.");
+                                            return;
+                                        }
+                                        navigation.navigate("FolderScreen", {folderId, folderName});
+                                    }}>
                                         <Image 
                                             source={require('../images/Folder Open 01.png')}
                                             style={styles.Icon} />

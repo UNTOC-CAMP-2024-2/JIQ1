@@ -15,6 +15,7 @@ import QuizListstyles from "./QuizListStyles";
 const STORAGE_KEY = "@quizList";
 
 const FolderScreen = ({ setTapPressed }) => {
+
     const navigation = useNavigation();
     const route = useRoute();
     const folderName = route.params?.folderName;
@@ -36,9 +37,15 @@ const FolderScreen = ({ setTapPressed }) => {
 
     // AsyncStorage에서 퀴즈 리스트 로드
     useEffect(() => {
+        if (!route?.params?.folderId) {
+            Alert.alert("오류", "폴더 ID가 누락되었습니다.");
+            navigation.goBack(); // 이전 화면으로 돌아가기
+            return;
+        }
+
         const loadQuizzes = async () => {
             try {
-                const folderId = route.params?.folderId; // 현재 폴더의 ID
+                const folderId = route.params?.folderId;//folder_id 가져오기
                 const storedQuizzes = await AsyncStorage.getItem(`${STORAGE_KEY}_${folderId}`);
                 if (storedQuizzes) {
                     setQuizList(JSON.parse(storedQuizzes));
@@ -52,17 +59,19 @@ const FolderScreen = ({ setTapPressed }) => {
         loadQuizzes();
     }, [route.params?.folderId]);
 
+    //const folderId = route?.params?.folderId || null;
+       
     // AsyncStorage에 퀴즈 리스트 저장
     const saveQuizzes = async (quizzes) => {
         try {
             const folderId = route.params?.folderId; // 현재 폴더 ID
             if (!folderId) {
-                console.error("Folder ID is missing");
+                console.error("폴더 ID가 누락되었습니다.");
                 return;
             }
             await AsyncStorage.setItem(`${STORAGE_KEY}_${folderId}`, JSON.stringify(quizzes));
         } catch (error) {
-            console.error("Failed to save quizzes:", error);
+            console.error("퀴즈 저장 실패:", error);
         }
     };
 
@@ -141,6 +150,7 @@ const FolderScreen = ({ setTapPressed }) => {
             question: '문제 화면',
             currentPage: 1,
             totalPage: 5,
+            folderId: route.params?.folderId,
         });
     };
 
