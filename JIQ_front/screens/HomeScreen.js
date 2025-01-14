@@ -23,7 +23,7 @@ import { useNavigation } from "@react-navigation/native";
 import { theme } from "../Colors";
 import styles from "./HomeScreenStyles";
 
-import axios from 'axios'; //벡엔드와 통신
+import axios from 'axios'; //벡엔드와 통신신
 
 const STORAGE_KEY = "@folders";
 
@@ -105,22 +105,25 @@ const HomeScreen = ({ setTapPressed }) => {
             const newFolder = response.data;
             console.log("폴더 생성 성공:", newFolder);
 
-
             const updatedFolders = {
                 ...folders,
-                [newFolder.folder_id]: { name: newFolder.folder_name },
+                [newFolder.id]: { name: newFolder.folder_name },
             };
 
             setFolders(updatedFolders);
-            await saveFolders(updatedFolders); // AsyncStorage에 저장  
+            await saveFolders(updatedFolders); // AsyncStorage에 저장
         } catch (error) {
-            console.error("폴더 이름 백엔드 저장 실패:", error.response?.data || error.message);                
+            console.error("폴더 이름 백엔드 저장 실패:", error.response?.data || error.message);
             Alert.alert("백엔드 오류", "폴더 이름을 저장하지 못했습니다.");
         } finally {
             setName("");
             setNameModal(false);
-        }        
+        }
+        
     };
+
+
+
 
     const deleteFolder = (key) => {
         Alert.alert("폴더 삭제", "폴더를 삭제하시겠습니까?", [
@@ -187,7 +190,7 @@ const HomeScreen = ({ setTapPressed }) => {
                         <View style={styles.row}>
                             {Object.keys(folders).map((key) => (
                                 <View key={key} style={{ flexDirection: "column", justifyContent: "center", alignItems: "center", paddingVertical: 10 }}>
-                                    <TouchableOpacity onPress={()=> navigation.navigate("FolderScreen", {folderName:folders[key]?.name, folderId: key})}>
+                                    <TouchableOpacity onPress={()=> navigation.navigate("FolderScreen", {folderName:folders[key]?.name, folderKey: key})}>
                                         <Image 
                                             source={require('../images/Folder Open 01.png')}
                                             style={styles.Icon} />
