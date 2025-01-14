@@ -192,7 +192,9 @@ const FolderScreen = ({ setTapPressed }) => {
                                     onPress={() => handleViewQuiz(quiz)}>
                                         <Text style={QuizListstyles.buttonText}>문제 보기</Text>
                                     </TouchableOpacity>
-                                    <TouchableOpacity style={QuizListstyles.answerButton}>
+                                    <TouchableOpacity
+                                    onPress={() => navigation.navigate('WrongScreen')}
+                                    style={QuizListstyles.answerButton}>
                                         <Text style={QuizListstyles.buttonText}>오답</Text>
                                     </TouchableOpacity>
                                     <Text style={QuizListstyles.itemScore}>{quiz.type}</Text>

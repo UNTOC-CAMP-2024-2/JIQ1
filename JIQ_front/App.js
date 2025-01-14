@@ -7,6 +7,8 @@ import HomeScreen from './screens/HomeScreen';
 import FolderScreen from './screens/FolderScreen';
 import ShortAnswerQuiz from './screens/ShortAnswerQuiz';
 import LogoAnimation from './screens/LogoAnimation';
+import WrongScreen from './screens/WrongScreen';
+
 
 const Stack = createStackNavigator();
 
@@ -28,12 +30,11 @@ const App = () => {
       <Stack.Navigator
       initialRouteName='Home'
       screenOptions={{ animationEnabled: false, gestureEnabled:false }}>
-          <Stack.Screen name="Home">
-            {props => (
-              <HomeScreen {...props} tabPressed={tabPressed} setTapPressed={setTapPressed} />
-            )}
+          <Stack.Screen name="Home" component = {HomeScreen}>
           </Stack.Screen>
           <Stack.Screen name="FolderScreen" component={FolderScreen}>
+          </Stack.Screen>
+          <Stack.Screen name = "WrongScreen" component={WrongScreen}>
           </Stack.Screen>
           <Stack.Screen name="ShortAnswerQuiz" component={ShortAnswerQuiz}>
           </Stack.Screen>
