@@ -15,7 +15,7 @@ import QuizListstyles from "./QuizListStyles";
 const STORAGE_KEY = "@quizList";
 
 const FolderScreen = ({ setTapPressed }) => {
-
+    
     const navigation = useNavigation();
     const route = useRoute();
     const folderName = route.params?.folderName;
@@ -128,7 +128,7 @@ const FolderScreen = ({ setTapPressed }) => {
                 type: "application/pdf",
             });
 
-            const response = await axios.post("pdf 보낼 백엔드 경로 입력", formData, {
+            const response = await axios.post("http://34.83.186.210:8000/quiz/quiz/generate-from-file", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
