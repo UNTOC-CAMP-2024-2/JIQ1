@@ -17,6 +17,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
         overflow: 'hidden',
         borderRadius: 12,
+        zIndex: 10,
     },
     headerBg: {
         flex: 1,

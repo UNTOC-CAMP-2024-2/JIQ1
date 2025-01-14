@@ -272,8 +272,7 @@ const WrongScreen = () => {
                 </View>
                 <View style={styles.writePart}>
                     <ImageBackground style={styles.writeScreen} source={require("../images/오답 부분.png")} resizeMode="contain">
-                        <View style={styles.scrollContainer} {...panResponder.panHandlers} pointerEvents="box-none">
-                            <Svg style={{ flex: 1 }}>
+                            <Svg style={{ flex: 1 }} {...panResponder.panHandlers}>
                                 {(paths[currentPage] || []).map((p, index) => (
                                     <Path key={index} d={p.path} stroke={p.color} strokeWidth={p.width} fill="none" />
                                 ))}
@@ -281,7 +280,6 @@ const WrongScreen = () => {
                                     <Path d={currentPath} stroke={strokeColor} strokeWidth={strokeWidth} fill="none" />
                                 )}
                             </Svg>
-                        </View>
                     </ImageBackground>
                 </View>
             </View>
