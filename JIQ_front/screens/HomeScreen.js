@@ -107,7 +107,7 @@ const HomeScreen = ({ setTapPressed }) => {
 
             const updatedFolders = {
                 ...folders,
-                [newFolder.id]: { name: newFolder.folder_name },
+                [newFolder.folder_id]: { name: newFolder.folder_name },
             };
 
             setFolders(updatedFolders);
