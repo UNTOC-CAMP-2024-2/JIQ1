@@ -381,7 +381,7 @@ const WrongScreen = () => {
             <View style={styles.body}>
                 <View style={styles.probPart}>
                     <ImageBackground source={require("../images/문제 부분.png")} style={styles.probScreen} resizeMode="contain">
-                        <Text>{wrongData[currentPage].wrong}</Text> {/* 문제 텍스트 표시 */}
+                        <Text style={styles.questionText}>{wrongData[currentPage].wrong}</Text> {/* 문제 텍스트 표시 */}
                     </ImageBackground>
                 </View>
                 <View style={styles.writePart}>

@@ -45,6 +45,11 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
     },
+    questionText: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#000',
+    },
     scrollContainer: {
         padding: 20,
         alignItems: "flex-start",
