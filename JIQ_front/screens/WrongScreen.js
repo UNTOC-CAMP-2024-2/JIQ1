@@ -42,6 +42,8 @@ const WrongScreen = () => {
     const [strokeColor, setStrokeColor] = useState("#000000"); // 선 색깔
     const [isEraser, setIsEraser] = useState(false); // 지우개 모드
     const [currentPage, setCurrentPage] = useState(0); // 현재 페이지 인덱스
+    const [undoStacks, setUndoStacks] = useState(Array(wrongData.length).fill().map(() => []));
+    const [redoStacks, setRedoStacks] = useState(Array(wrongData.length).fill().map(() => []));
 
     useEffect(() => {
         loadPaths();
@@ -101,32 +103,71 @@ const WrongScreen = () => {
     };
 
     // 경로 삭제 로직
-    const handleErase = (locationX, locationY) => {
-        const tolerance = 10; // 삭제 감지 범위
-        const updatedPathsForPage = paths[currentPage].filter((pathObj) => {
-            const commands = pathObj.path.split(" ");
-            return !commands.some((command) => {
-                if (command.startsWith("M") || command.startsWith("L")) {
-                    const [cmdX, cmdY] = command
-                        .substring(1)
-                        .split(",")
-                        .map((coord) => parseFloat(coord));
-                    return (
-                        Math.abs(cmdX - locationX) < tolerance &&
-                        Math.abs(cmdY - locationY) < tolerance
-                    );
-                }
-                return false;
-            });
-        });
-
-        // 현재 페이지 경로 업데이트
+    const handleErase = (x, y) => {
         const updatedPaths = [...paths];
-        updatedPaths[currentPage] = updatedPathsForPage;
+        const currentPaths = updatedPaths[currentPage];
+        const removedPaths = [];
+    
+        const filteredPaths = currentPaths.filter((pathObj) => {
+            if (!pathObj || !pathObj.path) {
+                return true; // 잘못된 경로는 필터 유지
+            }
+    
+            const { path } = pathObj;
+            const isErased = isTouchingPath(path, x, y, 20); // 반경 20px 안의 경로 탐지
+            if (isErased) {
+                removedPaths.push(pathObj);
+            }
+            return !isErased; // 지워진 경로는 제외
+        });
+    
+        if (removedPaths.length > 0) {
+            setUndoStacks((prevStacks) => {
+                const newStacks = [...prevStacks];
+                newStacks[currentPage] = [
+                    ...newStacks[currentPage],
+                    { type: "erase", paths: removedPaths },
+                ];
+                return newStacks;
+            });
+    
+            setRedoStacks((prevStacks) => {
+                const newStacks = [...prevStacks];
+                newStacks[currentPage] = [];
+                return newStacks;
+            });
+        }
+    
+        updatedPaths[currentPage] = filteredPaths;
         setPaths(updatedPaths);
-        handlePathsChange(updatedPathsForPage);
+        handlePathsChange(filteredPaths); // 변경된 경로 저장
         savePaths(updatedPaths);
     };
+    
+    
+
+    const isTouchingPath = (path, x, y, radius) => {
+        if (!path || typeof path !== 'string') {
+            // path가 undefined 또는 string이 아닌 경우 안전하게 종료
+            return false;
+        }
+    
+        const points = path
+            .replace(/M|L/g, '') // 'M'과 'L' 제거
+            .trim()
+            .split(' ')
+            .map((point) => {
+                const [px, py] = point.split(',').map(Number);
+                return { x: px, y: py };
+            });
+    
+        return points.some((point) => {
+            const dx = point.x - x;
+            const dy = point.y - y;
+            return Math.sqrt(dx * dx + dy * dy) <= radius; // 반경 내에 있으면 true
+        });
+    };
+    
 
     const panResponder = PanResponder.create({
         onStartShouldSetPanResponder: () => true,
@@ -159,6 +200,79 @@ const WrongScreen = () => {
             }
         },
     });
+
+    const handleUndo = () => {
+        const updatedPaths = [...paths];
+        const undoStackForPage = [...undoStacks[currentPage]];
+        const redoStackForPage = [...redoStacks[currentPage]];
+    
+        if (undoStackForPage.length > 0) {
+            const lastAction = undoStackForPage.pop(); // 가장 최근 작업 꺼내기
+    
+            if (lastAction.type === "erase") {
+                // 지우기 작업 복구
+                updatedPaths[currentPage] = [
+                    ...updatedPaths[currentPage],
+                    ...lastAction.paths,
+                ];
+                redoStackForPage.push(lastAction); // 되돌린 작업을 redoStacks에 저장
+            } else if (lastAction.type === "draw") {
+                // 그리기 작업 되돌리기
+                const lastDrawnPath = updatedPaths[currentPage].pop();
+                redoStackForPage.push({ type: "draw", path: lastDrawnPath });
+            }
+    
+            setPaths(updatedPaths);
+            setUndoStacks((prevStacks) => {
+                const newStacks = [...prevStacks];
+                newStacks[currentPage] = undoStackForPage;
+                return newStacks;
+            });
+            setRedoStacks((prevStacks) => {
+                const newStacks = [...prevStacks];
+                newStacks[currentPage] = redoStackForPage;
+                return newStacks;
+            });
+            savePaths(updatedPaths); // 저장
+        }
+    };
+    
+
+    const handleRedo = () => {
+        const updatedPaths = [...paths];
+        const redoStackForPage = [...redoStacks[currentPage]];
+        const undoStackForPage = [...undoStacks[currentPage]];
+    
+        if (redoStackForPage.length > 0) {
+            const lastAction = redoStackForPage.pop(); // 가장 최근 되돌린 작업 꺼내기
+    
+            if (lastAction.type === "erase") {
+                // 다시 삭제 상태로 되돌림
+                updatedPaths[currentPage] = updatedPaths[currentPage].filter(
+                    (pathObj) => !lastAction.paths.includes(pathObj)
+                );
+                undoStackForPage.push(lastAction); // 되돌린 작업을 undoStacks에 저장
+            } else if (lastAction.type === "draw") {
+                // 다시 그린 경로 복구
+                updatedPaths[currentPage].push(lastAction.path);
+                undoStackForPage.push({ type: "draw", path: lastAction.path });
+            }
+    
+            setPaths(updatedPaths);
+            setRedoStacks((prevStacks) => {
+                const newStacks = [...prevStacks];
+                newStacks[currentPage] = redoStackForPage;
+                return newStacks;
+            });
+            setUndoStacks((prevStacks) => {
+                const newStacks = [...prevStacks];
+                newStacks[currentPage] = undoStackForPage;
+                return newStacks;
+            });
+            savePaths(updatedPaths); // 저장
+        }
+    };
+    
 
     const handleResult = () => {
         // Result 버튼을 눌렀을 때 동작
@@ -251,10 +365,10 @@ const WrongScreen = () => {
                     onValueChange={(value) => setStrokeWidth(value)}/>
                     </View>
                     <View style={styles.doUndo}>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={handleUndo}>
                         <Feather name="corner-up-left" size={24} color="black" style={{margin: 5}}/>
                     </TouchableOpacity>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={handleRedo}>
                         <Feather name="corner-up-right" size={24} color="black" style={{margin: 5}}/>
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -267,13 +381,12 @@ const WrongScreen = () => {
             <View style={styles.body}>
                 <View style={styles.probPart}>
                     <ImageBackground source={require("../images/문제 부분.png")} style={styles.probScreen} resizeMode="contain">
-                        <Text>{wrongData[currentPage].wrong}</Text> {/* 문제 텍스트 표시 */}
+                        <Text style={styles.questionText}>{wrongData[currentPage].wrong}</Text> {/* 문제 텍스트 표시 */}
                     </ImageBackground>
                 </View>
                 <View style={styles.writePart}>
                     <ImageBackground style={styles.writeScreen} source={require("../images/오답 부분.png")} resizeMode="contain">
-                        <View style={styles.scrollContainer} {...panResponder.panHandlers} pointerEvents="box-none">
-                            <Svg style={{ flex: 1 }}>
+                            <Svg style={{ flex: 1 }} {...panResponder.panHandlers}>
                                 {(paths[currentPage] || []).map((p, index) => (
                                     <Path key={index} d={p.path} stroke={p.color} strokeWidth={p.width} fill="none" />
                                 ))}
@@ -281,7 +394,6 @@ const WrongScreen = () => {
                                     <Path d={currentPath} stroke={strokeColor} strokeWidth={strokeWidth} fill="none" />
                                 )}
                             </Svg>
-                        </View>
                     </ImageBackground>
                 </View>
             </View>
