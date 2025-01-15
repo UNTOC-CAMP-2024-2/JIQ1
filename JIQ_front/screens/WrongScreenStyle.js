@@ -17,6 +17,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
         overflow: 'hidden',
         borderRadius: 12,
+        zIndex: 10,
     },
     headerBg: {
         flex: 1,
@@ -43,6 +44,11 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         justifyContent: "center",
         alignItems: "center",
+    },
+    questionText: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#000',
     },
     scrollContainer: {
         padding: 20,
