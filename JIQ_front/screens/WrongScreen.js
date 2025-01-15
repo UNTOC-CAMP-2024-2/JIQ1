@@ -43,6 +43,7 @@ const WrongScreen = () => {
     const [isEraser, setIsEraser] = useState(false); // 지우개 모드
     const [currentPage, setCurrentPage] = useState(0); // 현재 페이지 인덱스
     const [undoStacks, setUndoStacks] = useState(Array(wrongData.length).fill().map(() => []));
+    const [redoStacks, setRedoStacks] = useState(Array(wrongData.length).fill().map(() => []));
 
     useEffect(() => {
         loadPaths();
@@ -107,32 +108,50 @@ const WrongScreen = () => {
         const currentPaths = updatedPaths[currentPage];
         const removedPaths = [];
     
-        // 현재 페이지에서 터치 위치와 가까운 경로 삭제
         const filteredPaths = currentPaths.filter((pathObj) => {
+            if (!pathObj || !pathObj.path) {
+                return true; // 잘못된 경로는 필터 유지
+            }
+    
             const { path } = pathObj;
             const isErased = isTouchingPath(path, x, y, 20); // 반경 20px 안의 경로 탐지
             if (isErased) {
                 removedPaths.push(pathObj);
             }
-            return !isErased; // isErased가 true이면 해당 경로를 삭제
+            return !isErased; // 지워진 경로는 제외
         });
     
-        // 삭제된 경로를 Undo Stack에 저장
         if (removedPaths.length > 0) {
             setUndoStacks((prevStacks) => {
                 const newStacks = [...prevStacks];
-                newStacks[currentPage] = [...newStacks[currentPage], ...removedPaths];
+                newStacks[currentPage] = [
+                    ...newStacks[currentPage],
+                    { type: "erase", paths: removedPaths },
+                ];
+                return newStacks;
+            });
+    
+            setRedoStacks((prevStacks) => {
+                const newStacks = [...prevStacks];
+                newStacks[currentPage] = [];
                 return newStacks;
             });
         }
     
         updatedPaths[currentPage] = filteredPaths;
         setPaths(updatedPaths);
-        handlePathsChange(filteredPaths); // 변경된 경로를 저장
-        savePaths(filteredPaths);
+        handlePathsChange(filteredPaths); // 변경된 경로 저장
+        savePaths(updatedPaths);
     };
+    
+    
 
     const isTouchingPath = (path, x, y, radius) => {
+        if (!path || typeof path !== 'string') {
+            // path가 undefined 또는 string이 아닌 경우 안전하게 종료
+            return false;
+        }
+    
         const points = path
             .replace(/M|L/g, '') // 'M'과 'L' 제거
             .trim()
@@ -184,33 +203,76 @@ const WrongScreen = () => {
 
     const handleUndo = () => {
         const updatedPaths = [...paths];
-        if(updatedPaths[currentPage].length > 0) {
-            const lastPath = updatedPaths[currentPage].pop();
+        const undoStackForPage = [...undoStacks[currentPage]];
+        const redoStackForPage = [...redoStacks[currentPage]];
+    
+        if (undoStackForPage.length > 0) {
+            const lastAction = undoStackForPage.pop(); // 가장 최근 작업 꺼내기
+    
+            if (lastAction.type === "erase") {
+                // 지우기 작업 복구
+                updatedPaths[currentPage] = [
+                    ...updatedPaths[currentPage],
+                    ...lastAction.paths,
+                ];
+                redoStackForPage.push(lastAction); // 되돌린 작업을 redoStacks에 저장
+            } else if (lastAction.type === "draw") {
+                // 그리기 작업 되돌리기
+                const lastDrawnPath = updatedPaths[currentPage].pop();
+                redoStackForPage.push({ type: "draw", path: lastDrawnPath });
+            }
+    
+            setPaths(updatedPaths);
             setUndoStacks((prevStacks) => {
                 const newStacks = [...prevStacks];
-                newStacks[currentPage].push(lastPath);
-                return newStacks;
-            })
-            setPaths(updatedPaths);
-            handlePathsChange(updatedPaths[currentPage]);
-            savePaths(updatedPaths);
-        }
-    };
-
-    const handleRedo = () => {
-        if (undoStacks[currentPage].length > 0) {
-            const lastUndonePath = undoStacks[currentPage].pop();
-            const updatedPaths = [...paths];
-            updatedPaths[currentPage].push(lastUndonePath); // 복구된 경로 페이지에 추가
-            setPaths(updatedPaths);
-            setUndoStacks((prevStacks) => {
-                const newStacks = [...prevStacks];
-                newStacks[currentPage] = [...newStacks[currentPage]];
+                newStacks[currentPage] = undoStackForPage;
                 return newStacks;
             });
-            savePaths(updatedPaths); // 저장 
+            setRedoStacks((prevStacks) => {
+                const newStacks = [...prevStacks];
+                newStacks[currentPage] = redoStackForPage;
+                return newStacks;
+            });
+            savePaths(updatedPaths); // 저장
         }
     };
+    
+
+    const handleRedo = () => {
+        const updatedPaths = [...paths];
+        const redoStackForPage = [...redoStacks[currentPage]];
+        const undoStackForPage = [...undoStacks[currentPage]];
+    
+        if (redoStackForPage.length > 0) {
+            const lastAction = redoStackForPage.pop(); // 가장 최근 되돌린 작업 꺼내기
+    
+            if (lastAction.type === "erase") {
+                // 다시 삭제 상태로 되돌림
+                updatedPaths[currentPage] = updatedPaths[currentPage].filter(
+                    (pathObj) => !lastAction.paths.includes(pathObj)
+                );
+                undoStackForPage.push(lastAction); // 되돌린 작업을 undoStacks에 저장
+            } else if (lastAction.type === "draw") {
+                // 다시 그린 경로 복구
+                updatedPaths[currentPage].push(lastAction.path);
+                undoStackForPage.push({ type: "draw", path: lastAction.path });
+            }
+    
+            setPaths(updatedPaths);
+            setRedoStacks((prevStacks) => {
+                const newStacks = [...prevStacks];
+                newStacks[currentPage] = redoStackForPage;
+                return newStacks;
+            });
+            setUndoStacks((prevStacks) => {
+                const newStacks = [...prevStacks];
+                newStacks[currentPage] = undoStackForPage;
+                return newStacks;
+            });
+            savePaths(updatedPaths); // 저장
+        }
+    };
+    
 
     const handleResult = () => {
         // Result 버튼을 눌렀을 때 동작
