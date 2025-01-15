@@ -2,7 +2,7 @@ import React, {useState, useEffect} from "react";
 import { StatusBar } from "expo-status-bar";
 import AntDesign from "@expo/vector-icons/AntDesign";
 //import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { View, Text, TouchableOpacity, ImageBackground, Image, ScrollView, Modal, TextInput, Alert,} from "react-native";
+import { View, Text, TouchableOpacity, ImageBackground, Image, ScrollView, Modal, TextInput, Alert, Platform,} from "react-native";
 
 import * as DocumentPicker from "expo-document-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -12,6 +12,7 @@ import axios from "axios";
 import styles from "./HomeScreenStyles";
 import AddQuizStyles from "./AddQuizStyles";
 import QuizListstyles from "./QuizListStyles";
+import FolerScreenstyle from "./FolderScreenStyle";
 const STORAGE_KEY = "@quizList";
 
 const FolderScreen = ({ setTapPressed }) => {
@@ -155,7 +156,7 @@ const FolderScreen = ({ setTapPressed }) => {
     };
 
       return (
-        <View style={styles.container}>
+        <View style={[styles.container, {paddingTop: Platform.OS === 'ios' ? 50 : 20}]}>
             <StatusBar style="light" />
             <View style={[styles.header, {marginTop: 20}]}>
                 <ImageBackground
@@ -165,16 +166,16 @@ const FolderScreen = ({ setTapPressed }) => {
                     imageStyle={{ borderRadius: 12 }}>
                     <View style={{ flexDirection: "row", alignItems: "center" }}>
                         <TouchableOpacity onPress={() => navigation.goBack()}>
-                            <AntDesign name="arrowleft" size={24} color="black" style={{paddingLeft: 20}} />
+                            <AntDesign name="arrowleft" size={28} color="black" style={{paddingLeft: 20}} />
                         </TouchableOpacity>
-                        <Text style={styles.headerText}>{folderName}</Text>
+                        <Text style={FolerScreenstyle.headerText}>{folderName}</Text>
                     </View>
                     
                     <View style={{ flexDirection: "row" }}>
                         <View style={styles.separator} />
                         <TouchableOpacity onPress={toggleModal}>
                             <View style={styles.addButton}>
-                                <AntDesign name="pluscircleo" size={24} style={styles.addIcon} />
+                                <AntDesign name="pluscircleo" size={30} style={styles.addIcon} />
                             </View> 
                         </TouchableOpacity>
                     </View>

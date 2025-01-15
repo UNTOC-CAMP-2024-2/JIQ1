@@ -44,7 +44,7 @@ const QuizListstyles = StyleSheet.create({
         marginHorizontal: 5,
     },
     answerButton: {
-        backgroundColor: "#E53E3E",
+        backgroundColor: "#cd5c5c",
         paddingVertical: 6,
         paddingHorizontal: 12,
         borderRadius: 8,

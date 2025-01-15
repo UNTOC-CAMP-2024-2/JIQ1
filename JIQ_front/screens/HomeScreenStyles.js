@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     headerText: {
-        fontSize: 30,
+        fontSize: 38,
         fontWeight: "600",
         fontWeight: 200,
         textAlign: "center",

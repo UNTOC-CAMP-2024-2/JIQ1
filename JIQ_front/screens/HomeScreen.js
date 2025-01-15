@@ -123,19 +123,10 @@ const HomeScreen = ({ setTapPressed }) => {
     };
 
     const deleteFolder = (key) => {
-        Alert.alert("폴더 삭제", "폴더를 삭제하시겠습니까?", [
-            { text: "취소"},
-            {
-                text: "삭제",
-                style: "destructive",
-                onPress: () => {
-                    const newFolders = {...folders};
-                    delete newFolders[key];
-                    setFolders(newFolders);
-                    saveFolders(newFolders);
-                },
-            },
-        ]);
+        const newFolders = {...folders};
+        delete newFolders[key];
+        setFolders(newFolders);
+        saveFolders(newFolders);
     };
 
     const changeName = (key) => {
@@ -156,7 +147,7 @@ const HomeScreen = ({ setTapPressed }) => {
     const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, {paddingTop: Platform.OS === 'ios' ? 50 : 20}]}>
             <StatusBar style="light" />
             <View style={styles.header}>
                 <ImageBackground
@@ -165,13 +156,13 @@ const HomeScreen = ({ setTapPressed }) => {
                     resizeMode="contain"
                     imageStyle={{ borderRadius: 12 }}>
                     <View style={{ flexDirection: "row" }}>
-                        <Text style={styles.headerText}>JIQ</Text>
+                        <Text style={[styles.headerText, {fontWeight: "bold"}]}>JIQ</Text>
                     </View>
                     <View style={{ flexDirection: "row" }}>
                         <View style={styles.separator} />
                         <TouchableOpacity onPress={addFolderModal}>
                             <View style={styles.addButton}>
-                                <AntDesign name="pluscircleo" size={24} style={styles.addIcon} />
+                                <AntDesign name="pluscircleo" size={30} style={styles.addIcon} />
                             </View> 
                         </TouchableOpacity>
                     </View>
@@ -221,57 +212,26 @@ const HomeScreen = ({ setTapPressed }) => {
             {/* 모달 */}
             <Modal visible={fileModal} transparent={true} animationType="slide">
                 <KeyboardAvoidingView style={styles.modalContainer} behavior={Platform.OS === "ios" ? "padding" : "height"}>
-                    <View style={styles.modal}>
-                        <View style={{...styles.folderModalScreen, flex: 0.65}}>
+                    <View style={[styles.modal, {height: '40%'}]}>
+                        <View style={{...styles.folderModalScreen, flex: 0.2}}>
                             <TextInput
                                 onChangeText={onChangeText}
                                 onSubmitEditing={() => changeName(selectedFolderKey)} // 선택된 폴더 이름 변경
                                 returnKeyType="done"
                                 value={name}
                                 placeholder={folders[selectedFolderKey]?.name || "폴더 이름"}
+                                placeholderTextColor="#394C8B"
                                 style={{...styles.input, textAlign: "center", fontSize: 30, fontWeight: "100%", width: "50%"}}
                             />
-                            {!isKetboardVisible && (
-                            <View
-                             style={styles.PieChartContainer}>
-                            <Svg width={400} height={400}>
-                                <G rotation={-90} origin={"200, 200"}>
-                                    <Circle
-                                    cx={200}
-                                    cy={200}
-                                    r={radius}
-                                    stroke={"#7CC6E8"}
-                                    strokeWidth={strokeWidth}
-                                    fill={"none"}/>
-                                    <Circle
-                                    cx={200}
-                                    cy={200}
-                                    r={radius}
-                                    stroke={"#394C8B"}
-                                    strokeWidth={strokeWidth}
-                                    fill={"none"}
-                                    strokeDasharray={`${circumference} ${circumference}`}
-                                    strokeDashoffset={strokeDashoffset}/>
-                                </G>
-                            </Svg>
-                            <View
-                             position="absolute"
-                             justifyContent="center"
-                             alignItems="center">
-                                <Text style={styles.pieChartText}>
-                                    정답률 {"\n"} 85%
-                                 </Text>
-                            </View>
-                            </View>
-                            )}
+                           
                             <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", width: "95%" }}>
                                 <TouchableOpacity
-                                    style={{...styles.Button, backgroundColor: theme.wrongSign, paddingHorizontal: 25}}
+                                    style={{...styles.Button, backgroundColor: "#cd5c5c", paddingHorizontal: 25}}
                                     onPress={() => {deleteFolder(selectedFolderKey)
                                         closeFolderModal()} // 폴더 삭제 후 모달 닫기
                                     }
                                 >
-                                    <Text style={{...styles.modalText, color: theme.bg, fontSize: 20, fontWeight: "100%", textAlign: "center"}}>폴더 삭제</Text>
+                                    <Text style={{...styles.modalText, color: theme.bg, fontSize: 20, fontWeight: "100%", textAlign: "center"}}>삭제</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     style={{...styles.Button, paddingHorizontal: 25}}

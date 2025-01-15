@@ -30,9 +30,9 @@ const App = () => {
       <Stack.Navigator
       initialRouteName='Home'
       screenOptions={{ animationEnabled: false, gestureEnabled:false }}>
-          <Stack.Screen name="Home" component = {HomeScreen}>
+          <Stack.Screen name="Home" component = {HomeScreen} options = {{headerShown: false}}>
           </Stack.Screen>
-          <Stack.Screen name="FolderScreen" component={FolderScreen}>
+          <Stack.Screen name="FolderScreen" component={FolderScreen} options={{headerShown: false}}>
           </Stack.Screen>
           <Stack.Screen name = "WrongScreen" component={WrongScreen}>
           </Stack.Screen>
