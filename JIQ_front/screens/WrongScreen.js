@@ -102,32 +102,53 @@ const WrongScreen = () => {
     };
 
     // 경로 삭제 로직
-    const handleErase = (locationX, locationY) => {
-        const tolerance = 10; // 삭제 감지 범위
-        const updatedPathsForPage = paths[currentPage].filter((pathObj) => {
-            const commands = pathObj.path.split(" ");
-            return !commands.some((command) => {
-                if (command.startsWith("M") || command.startsWith("L")) {
-                    const [cmdX, cmdY] = command
-                        .substring(1)
-                        .split(",")
-                        .map((coord) => parseFloat(coord));
-                    return (
-                        Math.abs(cmdX - locationX) < tolerance &&
-                        Math.abs(cmdY - locationY) < tolerance
-                    );
-                }
-                return false;
-            });
-        });
-
-        // 현재 페이지 경로 업데이트
+    const handleErase = (x, y) => {
         const updatedPaths = [...paths];
-        updatedPaths[currentPage] = updatedPathsForPage;
+        const currentPaths = updatedPaths[currentPage];
+        const removedPaths = [];
+    
+        // 현재 페이지에서 터치 위치와 가까운 경로 삭제
+        const filteredPaths = currentPaths.filter((pathObj) => {
+            const { path } = pathObj;
+            const isErased = isTouchingPath(path, x, y, 20); // 반경 20px 안의 경로 탐지
+            if (isErased) {
+                removedPaths.push(pathObj);
+            }
+            return !isErased; // isErased가 true이면 해당 경로를 삭제
+        });
+    
+        // 삭제된 경로를 Undo Stack에 저장
+        if (removedPaths.length > 0) {
+            setUndoStacks((prevStacks) => {
+                const newStacks = [...prevStacks];
+                newStacks[currentPage] = [...newStacks[currentPage], ...removedPaths];
+                return newStacks;
+            });
+        }
+    
+        updatedPaths[currentPage] = filteredPaths;
         setPaths(updatedPaths);
-        handlePathsChange(updatedPathsForPage);
-        savePaths(updatedPaths);
+        handlePathsChange(filteredPaths); // 변경된 경로를 저장
+        savePaths(filteredPaths);
     };
+
+    const isTouchingPath = (path, x, y, radius) => {
+        const points = path
+            .replace(/M|L/g, '') // 'M'과 'L' 제거
+            .trim()
+            .split(' ')
+            .map((point) => {
+                const [px, py] = point.split(',').map(Number);
+                return { x: px, y: py };
+            });
+    
+        return points.some((point) => {
+            const dx = point.x - x;
+            const dy = point.y - y;
+            return Math.sqrt(dx * dx + dy * dy) <= radius; // 반경 내에 있으면 true
+        });
+    };
+    
 
     const panResponder = PanResponder.create({
         onStartShouldSetPanResponder: () => true,
