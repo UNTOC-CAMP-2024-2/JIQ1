@@ -109,19 +109,16 @@ const WrongScreen = () => {
         const removedPaths = [];
     
         const filteredPaths = currentPaths.filter((pathObj) => {
-            if (!pathObj || !pathObj.path) {
-                return true; // 잘못된 경로는 필터 유지
-            }
-    
-            const { path } = pathObj;
-            const isErased = isTouchingPath(path, x, y, 20); // 반경 20px 안의 경로 탐지
+            if (!pathObj || !pathObj.path) return true; // 잘못된 경로는 유지
+            const isErased = isTouchingPath(pathObj.path, x, y, 20); // 반경 20px 안의 경로 탐지
             if (isErased) {
                 removedPaths.push(pathObj);
             }
-            return !isErased; // 지워진 경로는 제외
+            return !isErased; // 지운 경로는 제외
         });
     
         if (removedPaths.length > 0) {
+            // 지우기 작업을 undoStacks에 추가
             setUndoStacks((prevStacks) => {
                 const newStacks = [...prevStacks];
                 newStacks[currentPage] = [
@@ -131,6 +128,7 @@ const WrongScreen = () => {
                 return newStacks;
             });
     
+            // 새로운 작업이므로 redoStacks 초기화
             setRedoStacks((prevStacks) => {
                 const newStacks = [...prevStacks];
                 newStacks[currentPage] = [];
@@ -143,6 +141,7 @@ const WrongScreen = () => {
         handlePathsChange(filteredPaths); // 변경된 경로 저장
         savePaths(updatedPaths);
     };
+    
     
     
 
@@ -173,7 +172,7 @@ const WrongScreen = () => {
         onStartShouldSetPanResponder: () => true,
         onPanResponderGrant: (e) => {
             const { locationX, locationY } = e.nativeEvent;
-        
+    
             if (isEraser) {
                 handleErase(locationX, locationY); // 지우개 모드
             } else {
@@ -182,7 +181,7 @@ const WrongScreen = () => {
         },
         onPanResponderMove: (e) => {
             const { locationX, locationY } = e.nativeEvent;
-        
+    
             if (isEraser) {
                 handleErase(locationX, locationY); // 이동 중에도 지우개 작동
             } else {
@@ -191,15 +190,34 @@ const WrongScreen = () => {
         },
         onPanResponderRelease: () => {
             if (!isEraser && currentPath) {
-                const updatedPathsForPage = [
-                    ...paths[currentPage],
-                    { path: currentPath, color: strokeColor, width: strokeWidth },
-                ];
+                const newPath = { path: currentPath, color: strokeColor, width: strokeWidth };
+    
+                // 경로 추가
+                const updatedPathsForPage = [...paths[currentPage], newPath];
                 handlePathsChange(updatedPathsForPage);
+    
+                // Undo 스택에 새로운 경로 추가
+                setUndoStacks((prevStacks) => {
+                    const newStacks = [...prevStacks];
+                    newStacks[currentPage] = [
+                        ...newStacks[currentPage],
+                        { type: "draw", path: newPath },
+                    ];
+                    return newStacks;
+                });
+    
+                // 새로운 작업이므로 redoStacks 초기화
+                setRedoStacks((prevStacks) => {
+                    const newStacks = [...prevStacks];
+                    newStacks[currentPage] = [];
+                    return newStacks;
+                });
+    
                 setCurrentPath("");
             }
         },
     });
+    
 
     const handleUndo = () => {
         const updatedPaths = [...paths];
@@ -207,15 +225,15 @@ const WrongScreen = () => {
         const redoStackForPage = [...redoStacks[currentPage]];
     
         if (undoStackForPage.length > 0) {
-            const lastAction = undoStackForPage.pop(); // 가장 최근 작업 꺼내기
+            const lastAction = undoStackForPage.pop();
     
             if (lastAction.type === "erase") {
-                // 지우기 작업 복구
+                // 삭제된 경로 복구
                 updatedPaths[currentPage] = [
                     ...updatedPaths[currentPage],
                     ...lastAction.paths,
                 ];
-                redoStackForPage.push(lastAction); // 되돌린 작업을 redoStacks에 저장
+                redoStackForPage.push(lastAction); // 복구된 작업을 redoStacks에 저장
             } else if (lastAction.type === "draw") {
                 // 그리기 작업 되돌리기
                 const lastDrawnPath = updatedPaths[currentPage].pop();
@@ -237,14 +255,14 @@ const WrongScreen = () => {
         }
     };
     
-
+    
     const handleRedo = () => {
         const updatedPaths = [...paths];
         const redoStackForPage = [...redoStacks[currentPage]];
         const undoStackForPage = [...undoStacks[currentPage]];
     
         if (redoStackForPage.length > 0) {
-            const lastAction = redoStackForPage.pop(); // 가장 최근 되돌린 작업 꺼내기
+            const lastAction = redoStackForPage.pop();
     
             if (lastAction.type === "erase") {
                 // 다시 삭제 상태로 되돌림
@@ -272,6 +290,7 @@ const WrongScreen = () => {
             savePaths(updatedPaths); // 저장
         }
     };
+    
     
 
     const handleResult = () => {
