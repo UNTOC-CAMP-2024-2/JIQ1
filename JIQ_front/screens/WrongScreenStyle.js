@@ -46,9 +46,9 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     questionText: {
-        fontSize: 24,
+        fontSize: 30,
         fontWeight: 'bold',
-        color: '#000',
+        color: '#3A3960',
     },
     scrollContainer: {
         padding: 20,
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
         bottom : 20,
     },
     resultButton: {
-        backgroundColor: "#394C8B",
+        backgroundColor: "#000957",
         paddingVertical: 10,
         paddingHorizontal: 30,
         borderRadius: 10,
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     },
     resultButtonText: {
         color: "#fff",
-        fontSize: 16,
+        fontSize: 20,
         fontWeight: "bold",
     },
     pageIndicatorText: {

@@ -27,6 +27,7 @@ const WrongScreen = () => {
     const { quizId = null } = route.params || {};
     const [wrongData, setWrongData] = useState([]);
     const [currentPage, setCurrentPage] = useState(0); // 현재 페이지 인덱스
+    const [correctAnswerVisible, setCorrectAnswerVisible] = useState(false);
 
 
     const [paths, setPaths] = useState([]);
@@ -44,6 +45,7 @@ const WrongScreen = () => {
             try {
                 const response = await axios.get(`http://34.83.186.210:8000/retry/retry/incorrect-answers/${quizId}`);
                 console.log("API Response:", response.data);
+
                 const data = response.data;
                 if (data.incorrect_answers && Array.isArray(data.incorrect_answers)) {
                     setWrongData(data.incorrect_answers); // incorrect_answers 배열 설정
@@ -59,6 +61,11 @@ const WrongScreen = () => {
         };
         fetchWrongData();
     }, [quizId]);
+
+    const toggleCorrectAnswer = () => {
+        setCorrectAnswerVisible((prev) => !prev);
+    };
+
 
 
 
@@ -104,6 +111,7 @@ const WrongScreen = () => {
     const handleNextPage = () => {
         if (currentPage < wrongData.length - 1) {
             setCurrentPage(currentPage + 1);
+            setCorrectAnswerVisible(false);
         } else {
             Alert.alert("오답 완료", "모든 오답을 완료했습니다!");
         }
@@ -112,6 +120,7 @@ const WrongScreen = () => {
     const handlePreviousPage = () => {
         if (currentPage > 0) {
             setCurrentPage(currentPage - 1);
+            setCorrectAnswerVisible(false);
         }
     };
 
@@ -288,9 +297,17 @@ const WrongScreen = () => {
     
 
     const handleResult = () => {
-        // Result 버튼을 눌렀을 때 동작
-        Alert.alert("오답 완료", "모든 오답을 완료했습니다!");
-      };
+        Alert.alert("오답 완료",
+            "모든 오답을 완료했습니다!",
+        [
+            {
+                text: "OK",
+                onPress: () => navigation.goBack(),
+            },
+        ],
+        {cancelable: false}
+    );
+};
       
 
     return (
@@ -395,9 +412,31 @@ const WrongScreen = () => {
                 <View style={styles.probPart}>
                     <ImageBackground source={require("../images/문제 부분.png")} style={styles.probScreen} resizeMode="contain">
                         <Text style={styles.questionText}>{wrongData[currentPage]?.retry_question || "Loading..."}
+                        </Text>
+                        {/*정답 보이는 영역*/}
+                        <TouchableOpacity
+                            style={{
+                                position: "absolute",
+                                top: 59,
+                                right: 3,
+                                width: 200,
+                                height: 50,
+                                backgroundColor: "#000957",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                borderRadius: 12,
+                            }}
+                            onPress={toggleCorrectAnswer}
+                        >
+                            <Text style={{ color: "#fff", fontSize: 25, textAlign: "center" }}>
+                                {correctAnswerVisible
+                                    ? wrongData[currentPage]?.correct_answer || "No Answer"
+                                    : "정답"}
                             </Text>
+                        </TouchableOpacity>
                     </ImageBackground>
                 </View>
+
                 <View style={styles.writePart}>
                     <ImageBackground style={styles.writeScreen} source={require("../images/오답 부분.png")} resizeMode="contain">
                             <Svg style={{ flex: 1 }} {...panResponder.panHandlers}>
