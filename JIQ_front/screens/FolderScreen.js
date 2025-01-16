@@ -1,7 +1,6 @@
 import React, {useState, useEffect} from "react";
 import { StatusBar } from "expo-status-bar";
 import AntDesign from "@expo/vector-icons/AntDesign";
-//import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { View, Text, TouchableOpacity, ImageBackground, Image, ScrollView, Modal, TextInput, Alert, Platform,} from "react-native";
 
 import * as DocumentPicker from "expo-document-picker";
@@ -15,8 +14,6 @@ import QuizListstyles from "./QuizListStyles";
 import FolerScreenstyle from "./FolderScreenStyle";
 const STORAGE_KEY = "@quizList";
 
-import * as FileSystem from "expo-file-system";
-
 const FolderScreen = ({ setTapPressed }) => {
     
     const navigation = useNavigation();
@@ -28,6 +25,7 @@ const FolderScreen = ({ setTapPressed }) => {
     const [quizList, setQuizList] = useState([]); // 퀴즈 목록 상태
     const [uploadedFile, setUploadedFile] = useState(null);
     const [fileUri, setFileUri] = useState(null);
+
 
     // 모달 표시/숨기기 토글
     const toggleModal = () => {
@@ -93,13 +91,14 @@ const FolderScreen = ({ setTapPressed }) => {
             return;
         }
 
-        if (!uploadedFile) {
+        if (!uploadedFile || !uploadedFile.quiz_id) {
             Alert.alert("업로드된 파일 없음", "PDF 파일을 업로드해주세요.");
             return;
         }
 
-        const newQuiz = { name: quizName, file: uploadedFile };
+        const newQuiz = { name: quizName, file: uploadedFile, quiz_id: uploadedFile.quiz_id,};
         setQuizList((prevQuizzes) => [...prevQuizzes, newQuiz]);
+        console.log(`Quiz Created: ${JSON.stringify(newQuiz)}`);
         Alert.alert("성공", `퀴즈 "${quizName}"가 생성되었습니다.`);
         toggleModal(); // 모달 닫기
     };
@@ -188,9 +187,7 @@ const FolderScreen = ({ setTapPressed }) => {
     //문제 보기 화면 연결 -> 항상 단답형으로 이동
     const handleViewQuiz = (quiz) => {
         navigation.navigate('ShortAnswerQuiz', {
-            question: '문제 화면',
-            currentPage: 1,
-            totalPage: 5,
+            quiz_id: quiz.quiz_id,
             folderId: route.params?.folderId,
         });
     };

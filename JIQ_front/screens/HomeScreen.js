@@ -17,7 +17,6 @@ import {
     ImageBackground,
     Image,
 } from "react-native";
-import Svg, { Circle, G } from "react-native-svg";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { theme } from "../Colors";
@@ -139,12 +138,6 @@ const HomeScreen = ({ setTapPressed }) => {
         saveFolders(newFolders);
         setName("");
     };
-
-    const radius = 140;
-    const strokeWidth = 25;
-    const circumference = 2 * Math.PI * radius;
-    const percentage = 85;
-    const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
     return (
         <View style={[styles.container, {paddingTop: Platform.OS === 'ios' ? 50 : 20}]}>

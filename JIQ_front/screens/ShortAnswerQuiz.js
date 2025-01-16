@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect} from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
-  StyleSheet,
   TextInput,
   KeyboardAvoidingView,
   ScrollView,
@@ -13,27 +12,43 @@ import {
 import ShortAnswerQuizStyles from './ShortAnswerQuizStyles';
 import AntDesign from "@expo/vector-icons/AntDesign";
 
-const ShortAnswerQuiz = ({ route, navigation }) => {
-  //퀴즈 더 추가할려면 여기에 question 더 추가하면 됨
-  const quizData = [
-    { question: "문제 1: 사과는 무슨 색인가요?" },
-    { question: "문제 2: 바다는 어떤 색인가요?" },
-    { question: "문제 3: 내 나이는?" },
-    { question: "문제 4: 1+1은?" },
-    { question: "문제 5: 으아아아 도망쳐" },
-  ];
+import axios from "axios";
 
-  const [currentPage, setCurrentPage] = useState(0); // 현재 페이지 인덱스
-  const [answers, setAnswers] = useState(Array(quizData.length).fill('')); // 각 문제의 답 관리
+const ShortAnswerQuiz = ({ route, navigation }) => {
+  const { quiz_id } = route.params;
+  const [questions, setQuestions] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [answers, setAnswers] = useState([]);
+
+  useEffect(() => {
+    const fetchQuizQuestions = async () => {
+      try {
+        const response = await axios.get(`http://34.83.186.210:8000/quiz/quiz/get-quiz/${quiz_id}`);
+        const allQuestion = response.data.question || [];
+
+        const filteredQuestions = allQuestion.filter(
+          (question) => question.quiz_number >= 1 && question.quiz_number <= 10
+        );
+
+        setQuestions(filteredQuestions);
+        setAnswers(Array(filteredQuestions.length).fill(''));
+      } catch (error) {
+        console.error("문제 가져오기 실패:", error);
+      }
+    };
+    fetchQuizQuestions();
+  }, [quiz_id]);
+
+  const currentQuestion = questions[currentPage - 1];
 
   const handleAnswerChange = (text) => {
     const updatedAnswers = [...answers];
-    updatedAnswers[currentPage] = text; // 현재 페이지에 입력한 답 저장
+    updatedAnswers[currentPage - 1] = text; // 현재 페이지에 입력한 답 저장
     setAnswers(updatedAnswers);
   };
 
   const handleNextPage = () => {
-    if (currentPage < quizData.length - 1) {
+    if (currentPage < questions.length) {
       setCurrentPage(currentPage + 1); // 다음 페이지로 이동
     } else {
       Alert.alert("퀴즈 완료", "모든 문제를 완료했습니다!");
@@ -42,12 +57,11 @@ const ShortAnswerQuiz = ({ route, navigation }) => {
   };
 
   const handlePreviousPage = () => {
-    if (currentPage > 0) {
+    if (currentPage > 1) {
       setCurrentPage(currentPage - 1); // 이전 페이지로 이동
     }
   };
 
-  const currentQuiz = quizData[currentPage]; // 현재 문제 가져오기
 
   const handleResult = () => {
     // Result 버튼을 눌렀을 때 동작
@@ -62,22 +76,28 @@ const ShortAnswerQuiz = ({ route, navigation }) => {
        // iOS에서 키보드와의 간격 조정
     >
       <TouchableOpacity onPress={() => navigation.goBack()} style = {ShortAnswerQuizStyles.backButton}>
-        <AntDesign name="arrowleft" size={24} color="black" /> </TouchableOpacity>
-      
-      
+        <AntDesign name="arrowleft" size={24} color="black" />
+      </TouchableOpacity>
+          
       <ScrollView
         contentContainerStyle={ShortAnswerQuizStyles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
         <View style={ShortAnswerQuizStyles.questionContainer}>
-          <Text style={ShortAnswerQuizStyles.questionText}>{currentQuiz.question}</Text>
+          {currentQuestion ? (
+            <Text style={ShortAnswerQuizStyles.questionText}>
+              {`${currentQuestion.quiz_number}: ${currentQuestion.quiz_question}`}
+            </Text>
+          ) : (
+            <Text style={ShortAnswerQuizStyles.questionText}>문제를 불러오는 중...</Text>
+          )}
         </View>
 
         <View style={ShortAnswerQuizStyles.shadowBox}>
           <TextInput
             style={ShortAnswerQuizStyles.textInput}
             placeholder="정답을 입력하세요"
-            value={answers[currentPage]} // 현재 페이지의 답 표시
+            value={answers[currentPage - 1] || ''} // 현재 페이지의 답 표시
             onChangeText={handleAnswerChange} // 입력값 업데이트
             multiline // 여러 줄 입력 가능
           />
@@ -88,15 +108,15 @@ const ShortAnswerQuiz = ({ route, navigation }) => {
         {/*이전 버튼*/}
         <TouchableOpacity
           onPress={handlePreviousPage}
-          disabled={currentPage === 0} // 첫 페이지에서는 비활성화
+          disabled={currentPage === 1} // 첫 페이지에서는 비활성화
         >
-          <AntDesign name="leftcircleo" size={40} color={currentPage === 0 ? "#d3d3d3" : "#394C8B"} />
+          <AntDesign name="leftcircleo" size={40} color={currentPage === 1 ? "#d3d3d3" : "#394C8B"} />
         </TouchableOpacity>
 
-        <Text style={ShortAnswerQuizStyles.pageIndicatorText}>{`${currentPage + 1}/${quizData.length}`}</Text>
+        <Text style={ShortAnswerQuizStyles.pageIndicatorText}>{`${currentPage}/${questions.length}`}</Text>
 
         {/* 다음 버튼 또는 Result 버튼 */}
-        {currentPage === quizData.length - 1 ? (
+        {currentPage === questions.length ? (
           <TouchableOpacity style={ShortAnswerQuizStyles.resultButton} onPress={handleResult}>
             <Text style={ShortAnswerQuizStyles.resultButtonText}>Result</Text>
           </TouchableOpacity>
