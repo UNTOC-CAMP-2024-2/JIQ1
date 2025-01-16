@@ -56,9 +56,10 @@ const ShortAnswerQuiz = ({ route, navigation }) => {
 
   return (
     <KeyboardAvoidingView
-      style={ShortAnswerQuizStyles.container}
+      style={[ShortAnswerQuizStyles.container, {paddingTop: Platform.OS === 'ios' ? 50 : 20}]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0} // iOS에서 키보드와의 간격 조정
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+       // iOS에서 키보드와의 간격 조정
     >
       <TouchableOpacity onPress={() => navigation.goBack()} style = {ShortAnswerQuizStyles.backButton}>
         <AntDesign name="arrowleft" size={24} color="black" /> </TouchableOpacity>

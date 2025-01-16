@@ -34,9 +34,9 @@ const App = () => {
           </Stack.Screen>
           <Stack.Screen name="FolderScreen" component={FolderScreen} options={{headerShown: false}}>
           </Stack.Screen>
-          <Stack.Screen name = "WrongScreen" component={WrongScreen}>
+          <Stack.Screen name = "WrongScreen" component={WrongScreen} options={{headerShown: false}}>
           </Stack.Screen>
-          <Stack.Screen name="ShortAnswerQuiz" component={ShortAnswerQuiz}>
+          <Stack.Screen name="ShortAnswerQuiz" component={ShortAnswerQuiz} options={{headerShown: false}}>
           </Stack.Screen>
 
       </Stack.Navigator>

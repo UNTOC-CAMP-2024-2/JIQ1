@@ -1,7 +1,19 @@
 {
-  "android": {
-    "package": "com.kangjw05.jiq_front"
+  "expo": {
+    "name": "JIQ Front",
+    "slug": "jiq_front",
+    "version": "1.0.0",
+    "ios": {
+      "bundleIdentifier": "com.kangjw05.jiq_front",
+      "infoPlist": {
+        "NSDocumentsUsageDescription": "이 앱은 PDF 파일 업로드를 위해 문서 폴더에 접근합니다.",
+        "NSDownloadsFolderUsageDescription": "이 앱은 다운로드된 PDF 파일을 업로드하기 위해 접근합니다.",
+        "UIFileSharingEnabled": true, 
+        "LSSupportsOpeningDocumentsInPlace": true
+      }
+    },
+    "android": {
+      "package": "com.kangjw05.jiq_front"
+    }
   }
 }
-
-

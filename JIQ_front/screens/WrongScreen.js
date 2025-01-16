@@ -281,8 +281,8 @@ const WrongScreen = () => {
       
 
     return (
-        <View style={styles.container}>
-            <StatusBar style="light" />
+        <View style={[styles.container, {paddingTop: Platform.OS === 'ios' ? 50 : 20}]}>
+            <StatusBar style="light"/>
             <View style={styles.header}>
                 <ImageBackground
                 source={require("../images/toolbar.png")}

@@ -15,6 +15,8 @@ import QuizListstyles from "./QuizListStyles";
 import FolerScreenstyle from "./FolderScreenStyle";
 const STORAGE_KEY = "@quizList";
 
+import * as FileSystem from "expo-file-system";
+
 const FolderScreen = ({ setTapPressed }) => {
     
     const navigation = useNavigation();
@@ -24,18 +26,24 @@ const FolderScreen = ({ setTapPressed }) => {
     const [isModalVisible, setModalVisible] = useState(false);
     const [quizName, setQuizName] = useState(""); // 퀴즈 이름 상태
     const [quizList, setQuizList] = useState([]); // 퀴즈 목록 상태
-    const [selectedFile, setSelectedFile] = useState(null);
+    const [uploadedFile, setUploadedFile] = useState(null);
 
     // 모달 표시/숨기기 토글
     const toggleModal = () => {
+        console.log("모달 토글 호출됨");
         if (isModalVisible) {
             // 모달이 닫힐 때 상태 초기화
             setQuizName(""); // 퀴즈 이름 초기화
-            setSelectedFile(null); // 파일 초기화
+            setUploadedFile(null); // 파일 초기화
         }
         setModalVisible(!isModalVisible);
+        console.log("모달 상태:", !isModalVisible);
     };
 
+    useEffect(() => {
+        console.log("현재 선택된 파일:", uploadedFile);
+    }, [uploadedFile]);
+    
     // AsyncStorage에서 퀴즈 리스트 로드
     useEffect(() => {
         if (!route?.params?.folderId) {
@@ -76,20 +84,22 @@ const FolderScreen = ({ setTapPressed }) => {
         }
     };
 
-    // 퀴즈 생성 핸들러
+    // 퀴즈 생성 함수
     const handleCreateQuiz = () => {
-        if (!quizName.trim()){
+        if (!quizName.trim()) {
             Alert.alert("생성불가", "퀴즈 이름을 입력해주세요.");
             return;
-        } // 퀴즈 이름이나 유형이 비어있으면 추가 안 함
-        
-        const updatedQuizzes = [...quizList, { name: quizName }];
-        setQuizList(updatedQuizzes); // 상태 업데이트
-        saveQuizzes(updatedQuizzes); // AsyncStorage에 저장
-    
-        setQuizName(""); // 초기화
-        setModalVisible(false);
+        }
 
+        if (!uploadedFile) {
+            Alert.alert("업로드된 파일 없음", "PDF 파일을 업로드해주세요.");
+            return;
+        }
+
+        const newQuiz = { name: quizName, file: uploadedFile };
+        setQuizList((prevQuizzes) => [...prevQuizzes, newQuiz]);
+        Alert.alert("성공", `퀴즈 "${quizName}"가 생성되었습니다.`);
+        toggleModal(); // 모달 닫기
     };
 
     // 퀴즈 삭제 핸들러
@@ -113,38 +123,66 @@ const FolderScreen = ({ setTapPressed }) => {
         );
     };
 
-  // PDF 파일 선택 및 업로드
-    const handleFilePickandUpload = async () => {
+    const handleFilePickAndUpload = async () => {
+        console.log("파일 선택 함수 호출됨");
         try {
-        const result = await DocumentPicker.getDocumentAsync({
-            type: "application/pdf", // PDF 파일만 허용
-            copyToCacheDirectory: true,
-        });
-
-        if (result.type === "success") {
+            console.log("DocumentPicker 호출 시작");
+            const result = await DocumentPicker.getDocumentAsync({
+                type: "application/pdf",
+                copyToCacheDirectory: true,
+            });
+    
+            console.log("DocumentPicker 결과:", result);
+    
+            if (result.type === "cancel") {
+                console.log("사용자가 파일 선택 취소");
+                return;
+            }
+    
+            // 파일 정보가 assets 배열에 있는지 확인
+            const fileInfo = result.assets ? result.assets[0] : result;
+            if (!fileInfo || !fileInfo.uri) {
+                Alert.alert("파일 선택 오류", "선택된 파일의 경로를 찾을 수 없습니다.");
+                return;
+            }
+    
+            const fileUri = Platform.OS === "ios" ? fileInfo.uri.replace("file://", "") : fileInfo.uri;
+            console.log("파일 경로:", fileUri);
+    
             const formData = new FormData();
             formData.append("file", {
-                uri: result.uri,
-                name: result.name,
-                type: "application/pdf",
+                uri: fileInfo.uri,
+                name: fileInfo.name || "uploaded_file.pdf",
+                type: fileInfo.mimeType || "application/pdf",
             });
-
-            const response = await axios.post("http://34.83.186.210:8000/quiz/quiz/generate-from-file", formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
-            Alert.alert("성공", "파일이 성공적으로 업로드되었습니다.");
-            setUploadedFilePath(response.data.filePath); //업로드 된 파일 경로 저장장
-        } else {
-            Alert.alert("파일 선택 취소됨");
+    
+            console.log("FormData 생성 완료:", formData);
+    
+            // 백엔드로 파일 전송
+            const response = await axios.post(
+                "http://34.83.186.210:8000/quiz/quiz/generate-from-file",
+                formData,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                }
+            );
+    
+            console.log("백엔드 응답 데이터:", response.data);
+            setUploadedFile(response.data); // 업로드된 파일 상태 업데이트
+            Alert.alert("성공", "PDF가 성공적으로 업로드되었습니다.");
+        } catch (error) {
+            console.error("오류 발생:", error.response?.data || error.message);
+            Alert.alert("오류", "PDF 업로드 중 문제가 발생했습니다.");
         }
-    } catch (error) {
-        console.error("파일 업로드 중 오류:", error);
-        Alert.alert("오류", "파일 업로드 중 문제가 발생했습니다.");
-        }
+        console.log("파일 업로드 함수 종료");
     };
-
+    
+    
+    
+    
+    
     //문제 보기 화면 연결 -> 항상 단답형으로 이동
     const handleViewQuiz = (quiz) => {
         navigation.navigate('ShortAnswerQuiz', {
@@ -243,13 +281,13 @@ const FolderScreen = ({ setTapPressed }) => {
                     {/* PDF 파일 경로 표시 박스 */}
                     <View style={AddQuizStyles.filePathBox}>
                         <Text style={AddQuizStyles.filePathText}>
-                            {selectedFile ? `파일 경로: ${selectedFile.uri}` : "업로드된 PDF 파일 경로가 표시됩니다"}
+                            {uploadedFile ? `업로드된 파일일: ${uploadedFile.file_name}` : "PDF 파일을 업로드하세요요"}
                         </Text>
                     </View>
             
             {/* PDF 업로드 버튼 */}
             <View style={AddQuizStyles.buttonRow}>
-                <TouchableOpacity style={AddQuizStyles.uploadButton} onPress={handleFilePickandUpload}>
+                <TouchableOpacity style={AddQuizStyles.uploadButton} onPress={handleFilePickAndUpload}>
                 <Text style={AddQuizStyles.createButtonText}>pdf 업로드</Text>
                 </TouchableOpacity>
                             <TouchableOpacity
