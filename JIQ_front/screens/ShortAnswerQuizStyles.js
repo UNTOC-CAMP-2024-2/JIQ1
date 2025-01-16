@@ -3,24 +3,21 @@ import { StyleSheet } from 'react-native';
 const ShortAnswerQuizStyles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: '#fff',
+      backgroundColor: '#f0f8ff',
       padding: 16,
       justifyContent: 'space-between',
-      paddingBottom: 80,
+      paddingBottom: 70,
     },
     questionContainer: {
-      flex: 2.5,
+      height: 300,
       justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: '#fff',
       borderRadius: 10,
-      marginBottom: 20,
       marginHorizontal: 5,
-      //그림자
-      shadowColor: '#000',
-      shadowOffset: {width:3, height:4},
-      shadowOpacity: 0.2,
-      shadowRadius: 3,
+      marginTop: 15,
+      borderWidth: 5,
+      borderColor: '#131e3a'
     },
     scrollContent: {
         flexGrow: 1,
@@ -28,12 +25,11 @@ const ShortAnswerQuizStyles = StyleSheet.create({
     },      
     shadowBox: {
         backgroundColor: '#fff', // 흰색 배경
-        flex : 3,
+        height: 250,
         borderRadius: 10,
         padding: 10,
-        paddingTop: 20,
-        paddingBottom: 0,
-        marginBottom: 60,
+        paddingTop: 10,
+        marginBottom: 80,
         marginHorizontal: 5,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 }, // 그림자 위치
@@ -58,13 +54,13 @@ const ShortAnswerQuizStyles = StyleSheet.create({
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      bottom : 10,
+      bottom : 30,
       position: "absolute",
       width: "100%",
       right: 16,
     },
     pageIndicatorText: {
-      fontSize: 28, 
+      fontSize: 38, 
       color: "#394C8B", 
       textAlign: "center",
       opacity: 0.8,

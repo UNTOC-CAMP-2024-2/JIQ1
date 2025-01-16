@@ -46,12 +46,6 @@ const FolderScreen = ({ setTapPressed }) => {
     
     // AsyncStorage에서 퀴즈 리스트 로드
     useEffect(() => {
-        if (!route?.params?.folderId) {
-            Alert.alert("오류", "폴더 ID가 누락되었습니다.");
-            navigation.goBack(); // 이전 화면으로 돌아가기
-            return;
-        }
-
         const loadQuizzes = async () => {
             try {
                 const folderId = route.params?.folderId;//folder_id 가져오기
@@ -96,8 +90,11 @@ const FolderScreen = ({ setTapPressed }) => {
             return;
         }
 
-        const newQuiz = { name: quizName, file: uploadedFile, quiz_id: uploadedFile.quiz_id,};
-        setQuizList((prevQuizzes) => [...prevQuizzes, newQuiz]);
+        const newQuiz = { name: quizName, file: uploadedFile, quiz_id: uploadedFile.quiz_id };
+        const updatedQuizList = [...quizList, newQuiz];
+        setQuizList(updatedQuizList);
+        saveQuizzes(updatedQuizList);
+
         console.log(`Quiz Created: ${JSON.stringify(newQuiz)}`);
         Alert.alert("성공", `퀴즈 "${quizName}"가 생성되었습니다.`);
         toggleModal(); // 모달 닫기
