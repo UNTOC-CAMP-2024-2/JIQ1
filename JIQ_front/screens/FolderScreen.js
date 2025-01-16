@@ -13,6 +13,7 @@ import AddQuizStyles from "./AddQuizStyles";
 import QuizListstyles from "./QuizListStyles";
 import FolerScreenstyle from "./FolderScreenStyle";
 const STORAGE_KEY = "@quizList";
+const STOREAGE_SUBMISSION_KEY = "@quizSubmission";
 
 const FolderScreen = ({ setTapPressed }) => {
     
@@ -50,8 +51,15 @@ const FolderScreen = ({ setTapPressed }) => {
             try {
                 const folderId = route.params?.folderId;//folder_id 가져오기
                 const storedQuizzes = await AsyncStorage.getItem(`${STORAGE_KEY}_${folderId}`);
+                const storedStatus = await AsyncStorage.getItem(STOREAGE_SUBMISSION_KEY);
+                const submissionStatus = storedStatus ? JSON.parse(storedStatus) : {};
+
                 if (storedQuizzes) {
-                    setQuizList(JSON.parse(storedQuizzes));
+                    const quizzes = JSON.parse(storedQuizzes).map((quiz) => ({
+                        ...quiz,
+                        submited: submissionStatus[quiz.quiz_id] || false,
+                    }));
+                    setQuizList(quizzes);
                 } else {
                     setQuizList([]); // 폴더가 비어 있으면 초기화
                 }
@@ -183,16 +191,41 @@ const FolderScreen = ({ setTapPressed }) => {
     
     //문제 보기 화면 연결 -> 항상 단답형으로 이동
     const handleViewQuiz = (quiz) => {
-        navigation.navigate('ShortAnswerQuiz', {
-            quiz_id: quiz.quiz_id,
-            folderId: route.params?.folderId,
-        });
+        if (!quiz.submitted){
+            navigation.navigate('ShortAnswerQuiz', {
+                quiz_id: quiz.quiz_id,
+                folderId: route.params?.folderId,
+            });
+        } else {
+            navigation.navigate('resultscreen', {
+                quiz_id: quiz.quiz_id,
+            });
+        }
+
     };
 
     const handleWrongAnswers = (quiz) => {
         navigation.navigate("WrongScreen", {
             quizId: quiz.quiz_id,
         });
+    };
+
+
+    const saveSubmissionStatus = async (quizId, submitted) => {
+        try {
+            const storedStatus = await AsyncStorage.getItem(STOREAGE_SUBMISSION_KEY);
+            const submissionStatus = storedStatus ? JSON.parse(storedStatus) : {};
+            submissionStatus[quizId] = submitted;
+            await AsyncStorage.setItem(STOREAGE_SUBMISSION_KEY, JSON.stringify(submissionStatus));
+
+            setQuizList((prevQuizList) => 
+                prevQuizList.map((quiz) =>
+                    quiz.quiz_id === quizId ? {...quiz, submitted: true} : quiz
+                )
+            );
+        } catch (error) {
+            console.error("제출 상태 저장 실패:", error);
+        }
     };
 
       return (
@@ -237,11 +270,14 @@ const FolderScreen = ({ setTapPressed }) => {
                                     <AntDesign name="filetext1" size={35} color="#394C8B" />
                                     <Text style={QuizListstyles.quizItemText}>{quiz.name}</Text>
                                 </View>
+
                                 <View style={QuizListstyles.quizItemButtons}>
                                     <TouchableOpacity
                                     style={QuizListstyles.viewButton}
                                     onPress={() => handleViewQuiz(quiz)}>
-                                        <Text style={QuizListstyles.buttonText}>문제 보기</Text>
+                                        <Text style={QuizListstyles.buttonText}>
+                                            {quiz.submitted ? "결과 확인" : "문제 보기"}
+                                        </Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity
                                     onPress={() => handleWrongAnswers(quiz)}
