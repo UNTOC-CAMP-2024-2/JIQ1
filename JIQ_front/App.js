@@ -9,6 +9,8 @@ import ShortAnswerQuiz from './screens/ShortAnswerQuiz';
 import LogoAnimation from './screens/LogoAnimation';
 import WrongScreen from './screens/WrongScreen';
 
+import * as ScreenOrientation from 'expo-screen-orientation';
+
 
 const Stack = createStackNavigator();
 
@@ -17,6 +19,11 @@ const App = () => {
   const [isSplashVisible, setIsSplashVisible] = useState(true);
 
   React.useEffect(() => {
+    const lockOrientation = async () => {
+      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+    };
+    lockOrientation();
+
     const timer = setTimeout(() => setIsSplashVisible(false), 4000);
     return () => clearTimeout(timer);
   }, []);

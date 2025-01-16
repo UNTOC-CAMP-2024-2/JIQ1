@@ -22,6 +22,8 @@ const ShortAnswerQuiz = ({ route, navigation }) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [borderColor, setBorderColor] = useState('#000');
 
+  const [correctCount, setCorrectCount] = useState(0);
+
   const storageKey = `quiz_answers_${quiz_id}`;
   const submissionKey = `quiz_submitted_${quiz_id}`;
 
@@ -65,8 +67,13 @@ const ShortAnswerQuiz = ({ route, navigation }) => {
         const response = await axios.get(`http://34.83.186.210:8000/quiz/quiz/quiz-results/${quiz_id}`);
         console.log(response.data);
 
+        const results = response.data.results || [];
+
+        const correctAnswers = results.filter(result => result.is_correct).length;
+        setCorrectCount(correctAnswers);
+
          // results 배열에서 현재 페이지 번호에 해당하는 데이터 찾기
-        const result = response.data.results?.find(r => r.quiz_number === currentPage);
+        const result = results.find(r => r.quiz_number === currentPage);
 
         if (result) {
           setBorderColor(result.is_correct ? '#16C47F' : '#E16378');
@@ -153,9 +160,17 @@ const ShortAnswerQuiz = ({ route, navigation }) => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 80}
     >
-      <TouchableOpacity onPress={() => navigation.goBack()} style={ShortAnswerQuizStyles.backButton}>
-        <AntDesign name="arrowleft" size={30} color="black" />
-      </TouchableOpacity>
+      <View style={{flexDirection: "row", alignItems: "center", paddingHorizontal: 16, justifyContent: "space-between"}}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={ShortAnswerQuizStyles.backButton}>
+          <AntDesign name="arrowleft" size={35} color="black" />
+        </TouchableOpacity>
+
+        {isSubmitted && (
+          <Text style = {{fontSize: 45, color: '#000', marginLeft: 8, top:0, right: 10}}>
+            {`${correctCount}/10`}
+          </Text>
+        )}
+      </View>
 
 
         <View style={ShortAnswerQuizStyles.container}>

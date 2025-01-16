@@ -1,5 +1,6 @@
 {
   "expo": {
+    "oreintation": "landscape",
     "name": "JIQ Front",
     "slug": "jiq_front",
     "version": "1.0.0",
