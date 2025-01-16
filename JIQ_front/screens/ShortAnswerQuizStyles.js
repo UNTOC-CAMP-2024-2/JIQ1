@@ -39,7 +39,7 @@ const ShortAnswerQuizStyles = StyleSheet.create({
     textInput: {
         flex: 1, // 입력 필드가 박스를 꽉 채우도록
         textAlignVertical: 'top', // 텍스트가 위에서부터 입력되도록
-        fontSize: 20,
+        fontSize: 30,
         color: '#394c8b',
         padding: 10,
         borderRadius: 8,
