@@ -29,6 +29,7 @@ const ShortAnswerQuiz = ({ route, navigation }) => {
     const fetchQuizQuestions = async () => {
       try {
         const response = await axios.get(`http://34.83.186.210:8000/quiz/quiz/get-quiz/${quiz_id}`);
+        console.log("서버 응답 데이터:", response.data);
         const allQuestions = response.data.quizzes || [];
 
         if (allQuestions.length !== 10) {
@@ -45,7 +46,14 @@ const ShortAnswerQuiz = ({ route, navigation }) => {
         if(savedAnswers) setAnswers(JSON.parse(savedAnswers));
         if (submittedStatus === 'true') setIsSubmitted(true);
       } catch (error) {
-        console.error("문제 가져오기 실패:", error);
+        if (error.response) {
+          console.error("서버 응답 에러:", error.response.data);
+        } else if (error.request) {
+          console.error("요청 문제:", error.request);
+        } else {
+          console.error("오류 메시지:", error.message);
+        }
+        Alert.alert("오류", "데이터를 가져오는 중 문제가 발생했습니다.");
       }
     };
     fetchQuizQuestions();

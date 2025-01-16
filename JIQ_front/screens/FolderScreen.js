@@ -189,6 +189,12 @@ const FolderScreen = ({ setTapPressed }) => {
         });
     };
 
+    const handleWrongAnswers = (quiz) => {
+        navigation.navigate("WrongScreen", {
+            quizId: quiz.quiz_id,
+        });
+    };
+
       return (
         <View style={[styles.container, {paddingTop: Platform.OS === 'ios' ? 50 : 20}]}>
             <StatusBar style="light" />      
@@ -238,7 +244,7 @@ const FolderScreen = ({ setTapPressed }) => {
                                         <Text style={QuizListstyles.buttonText}>문제 보기</Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity
-                                    onPress={() => navigation.navigate('WrongScreen')}
+                                    onPress={() => handleWrongAnswers(quiz)}
                                     style={QuizListstyles.answerButton}>
                                         <Text style={QuizListstyles.buttonText}>오답</Text>
                                     </TouchableOpacity>

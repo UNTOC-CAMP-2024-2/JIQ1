@@ -7,47 +7,60 @@ import {
     View, 
     Text, 
     TouchableOpacity, 
-    TextInput,
-    ScrollView, 
-    Modal,
-    KeyboardAvoidingView,
-    Keyboard,
     Platform,
     Alert,
     ImageBackground,
-    Image,
     PanResponder,
 } from "react-native";
 import Slider from "@react-native-community/slider";
 import Svg, { Path } from "react-native-svg";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { createNavigationContainerRef, useNavigation, useRoute } from "@react-navigation/native";
 import styles from "./WrongScreenStyle";
+import axios from "axios";
 
 const STORAGE_KEY = "drawing_paths";
 
 const WrongScreen = () => {
     const navigation = useNavigation();
-    
-    const wrongData = [
-        { wrong: "문제 1: 사과는 무슨 색인가요?" },
-        { wrong: "문제 2: 바다는 어떤 색인가요?" },
-        { wrong: "문제 3: 내 나이는?" },
-        { wrong: "문제 4: 1+1은?" },
-    ];
+    const route = useRoute();
+    const { quizId = null } = route.params || {};
+    const [wrongData, setWrongData] = useState([]);
+    const [currentPage, setCurrentPage] = useState(0); // 현재 페이지 인덱스
 
-    const [paths, setPaths] = useState(() => Array.from({ length: wrongData.length }, () => []));
+
+    const [paths, setPaths] = useState([]);
     const [currentPath, setCurrentPath] = useState(""); // 현재 경로
     const [strokeWidth, setStrokeWidth] = useState(5); // 선 굵기
     const [strokeColor, setStrokeColor] = useState("#000000"); // 선 색깔
     const [isEraser, setIsEraser] = useState(false); // 지우개 모드
-    const [currentPage, setCurrentPage] = useState(0); // 현재 페이지 인덱스
     const [undoStacks, setUndoStacks] = useState(Array(wrongData.length).fill().map(() => []));
     const [redoStacks, setRedoStacks] = useState(Array(wrongData.length).fill().map(() => []));
 
     useEffect(() => {
-        loadPaths();
-    }, []);
+        console.log("Route Params:", route.params);
+
+        const fetchWrongData = async () => {
+            try {
+                const response = await axios.get(`http://34.83.186.210:8000/retry/retry/incorrect-answers/${quizId}`);
+                console.log("API Response:", response.data);
+                const data = response.data;
+                if (data.incorrect_answers && Array.isArray(data.incorrect_answers)) {
+                    setWrongData(data.incorrect_answers); // incorrect_answers 배열 설정
+                } else {
+                    console.warn("quiz_question 데이터가 비어 있거나 배열이 아닙니다:", data.incorrect_answers);
+                    setWrongData([]);
+                }
+
+            } catch (error) {
+                console.error("Failed to fetch data:", error);
+                Alert.alert("Error", "An error occured while fetching data.");
+            }
+        };
+        fetchWrongData();
+    }, [quizId]);
+
+
 
     const loadPaths = async () => {
         try {
@@ -381,7 +394,8 @@ const WrongScreen = () => {
             <View style={styles.body}>
                 <View style={styles.probPart}>
                     <ImageBackground source={require("../images/문제 부분.png")} style={styles.probScreen} resizeMode="contain">
-                        <Text style={styles.questionText}>{wrongData[currentPage].wrong}</Text> {/* 문제 텍스트 표시 */}
+                        <Text style={styles.questionText}>{wrongData[currentPage]?.retry_question || "Loading..."}
+                            </Text>
                     </ImageBackground>
                 </View>
                 <View style={styles.writePart}>
