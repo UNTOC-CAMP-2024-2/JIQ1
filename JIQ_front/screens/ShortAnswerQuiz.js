@@ -72,7 +72,7 @@ const ShortAnswerQuiz = ({ route, navigation }) => {
           setBorderColor(result.is_correct ? '#16C47F' : '#E16378');
         }
       } catch (error) {
-        console.error("결과 가져오기 실패:", error);
+        //console.error("결과 가져오기 실패:", error);
       }
     };
     fetchQuizResult();
