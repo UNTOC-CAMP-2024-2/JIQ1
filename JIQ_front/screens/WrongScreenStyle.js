@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         marginHorizontal: 10,
-        marginTop: 10,
+        marginTop: -50,
         overflow: 'hidden',
         borderRadius: 12,
         zIndex: 10,
@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
         marginTop: -10,
         marginBottom: 10,
         borderRadius: 12,
-        justifyContent: "center",
+        justifyContent: "flex-start",
         alignItems: "center",
     },
     questionText: {
@@ -70,11 +70,11 @@ const styles = StyleSheet.create({
         alignItems:"center",
     },
     probPart: {
-        flex: 1,
+        height: "55%",
         width: "100%",
         alignItems: "center",
         justifyContent: "center",
-        marginTop: -30,
+        marginTop: -50,
     },
     probScreen: {
         flex: 1,
@@ -86,11 +86,12 @@ const styles = StyleSheet.create({
     writePart: {
         flex: 1,
         width: "100%",
-        marginTop: -30,
+        marginTop: -45,
         marginBottom: 10,
+        height: "60%",
     },
     writeScreen: {
-        flex: 1,
+        height: "100%",
         width: "100%",
         alignItems: "center",
         justifyContent: "center",
@@ -100,7 +101,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        bottom : 10,
+        bottom : 20,
     },
     resultButton: {
         backgroundColor: "#394C8B",

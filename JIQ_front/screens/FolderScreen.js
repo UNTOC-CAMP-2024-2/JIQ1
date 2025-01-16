@@ -36,6 +36,7 @@ const FolderScreen = ({ setTapPressed }) => {
             // 모달이 닫힐 때 상태 초기화
             setQuizName(""); // 퀴즈 이름 초기화
             setUploadedFile(null); // 파일 초기화
+            setFileUri(null);
         }
         setModalVisible(!isModalVisible);
         console.log("모달 상태:", !isModalVisible);
@@ -126,7 +127,9 @@ const FolderScreen = ({ setTapPressed }) => {
 
     const handleFilePickAndUpload = async () => {
         console.log("파일 선택 함수 호출됨");
+
         try {
+
             console.log("DocumentPicker 호출 시작");
             const result = await DocumentPicker.getDocumentAsync({
                 type: "application/pdf",
@@ -178,13 +181,9 @@ const FolderScreen = ({ setTapPressed }) => {
         } catch (error) {
             console.error("오류 발생:", error.response?.data || error.message);
             Alert.alert("오류", "PDF 업로드 중 문제가 발생했습니다.");
-        }
+        } 
         console.log("파일 업로드 함수 종료");
     };
-    
-    
-    
-    
     
     //문제 보기 화면 연결 -> 항상 단답형으로 이동
     const handleViewQuiz = (quiz) => {
@@ -198,7 +197,7 @@ const FolderScreen = ({ setTapPressed }) => {
 
       return (
         <View style={[styles.container, {paddingTop: Platform.OS === 'ios' ? 50 : 20}]}>
-            <StatusBar style="light" />
+            <StatusBar style="light" />      
             <View style={[styles.header, {marginTop: 20}]}>
                 <ImageBackground
                     source={require('../images/Top app bar.png')}
