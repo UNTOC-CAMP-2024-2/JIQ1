@@ -27,6 +27,7 @@ const FolderScreen = ({ setTapPressed }) => {
     const [quizName, setQuizName] = useState(""); // 퀴즈 이름 상태
     const [quizList, setQuizList] = useState([]); // 퀴즈 목록 상태
     const [uploadedFile, setUploadedFile] = useState(null);
+    const [fileUri, setFileUri] = useState(null);
 
     // 모달 표시/숨기기 토글
     const toggleModal = () => {
@@ -148,6 +149,8 @@ const FolderScreen = ({ setTapPressed }) => {
     
             const fileUri = Platform.OS === "ios" ? fileInfo.uri.replace("file://", "") : fileInfo.uri;
             console.log("파일 경로:", fileUri);
+
+            setFileUri(fileUri);
     
             const formData = new FormData();
             formData.append("file", {
@@ -281,7 +284,7 @@ const FolderScreen = ({ setTapPressed }) => {
                     {/* PDF 파일 경로 표시 박스 */}
                     <View style={AddQuizStyles.filePathBox}>
                         <Text style={AddQuizStyles.filePathText}>
-                            {uploadedFile ? `업로드된 파일일: ${uploadedFile.file_name}` : "PDF 파일을 업로드하세요요"}
+                            {fileUri ? `${fileUri}` : "PDF 파일을 업로드하세요"}
                         </Text>
                     </View>
             
