@@ -39,6 +39,7 @@ const WrongScreen = () => {
     const [redoStacks, setRedoStacks] = useState(Array(wrongData.length).fill().map(() => []));
 
     useEffect(() => {
+        loadPaths()
         console.log("Route Params:", route.params);
 
         const fetchWrongData = async () => {
