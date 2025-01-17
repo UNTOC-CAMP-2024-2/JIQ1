@@ -97,7 +97,7 @@ const HomeScreen = ({ setTapPressed }) => {
         const folderName = name.trim(); // 폴더 이름 정리
 
         try {
-            const response = await axios.post("http://34.83.186.210:8000/folder/folder/create", {
+            const response = await axios.post("http://34.127.108.95:8000/folder/folder/create", {
                 folder_name: folderName,
             });
 

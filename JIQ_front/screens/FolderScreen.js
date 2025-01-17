@@ -170,7 +170,7 @@ const FolderScreen = ({ setTapPressed }) => {
     
             // 백엔드로 파일 전송
             const response = await axios.post(
-                "http://34.83.186.210:8000/quiz/quiz/generate-from-file",
+                "http://34.127.108.95:8000/quiz/quiz/generate-from-file",
                 formData,
                 {
                     headers: {

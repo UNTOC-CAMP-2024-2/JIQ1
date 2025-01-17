@@ -30,7 +30,7 @@ const ShortAnswerQuiz = ({ route, navigation }) => {
   useEffect(() => {
     const fetchQuizQuestions = async () => {
       try {
-        const response = await axios.get(`http://34.83.186.210:8000/quiz/quiz/get-quiz/${quiz_id}`);
+        const response = await axios.get(`http://34.127.108.95:8000/quiz/quiz/get-quiz/${quiz_id}`);
         console.log("서버 응답 데이터:", response.data);
         const allQuestions = response.data.quizzes || [];
 
@@ -64,12 +64,14 @@ const ShortAnswerQuiz = ({ route, navigation }) => {
   useEffect(() => {
     const fetchQuizResult = async () => {
       try {
-        const response = await axios.get(`http://34.83.186.210:8000/quiz/quiz/quiz-results/${quiz_id}`);
+        const response = await axios.get(`http://34.127.108.95:8000/quiz/quiz/quiz-results/${quiz_id}`);
         console.log(response.data);
 
         const results = response.data.results || [];
+        console.log("Filtered Correct Results:", results.filter((result) => result.is_correct === true));
 
-        const correctAnswers = results.filter(result => result.is_correct).length;
+        const correctAnswers = results.filter((result) => result.is_correct === true).length;
+        console.log("정답", correctAnswers);
         setCorrectCount(correctAnswers);
 
          // results 배열에서 현재 페이지 번호에 해당하는 데이터 찾기
@@ -132,7 +134,7 @@ const ShortAnswerQuiz = ({ route, navigation }) => {
 
       console.log("보낼 데이터:", JSON.stringify(payload, null, 2));
 
-      const response = await axios.post("http://34.83.186.210:8000/quiz/quiz/user-answers",
+      const response = await axios.post("http://34.127.108.95:8000/quiz/quiz/user-answers",
         payload,
         {
           headers: {

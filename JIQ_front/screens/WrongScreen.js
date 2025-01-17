@@ -39,12 +39,11 @@ const WrongScreen = () => {
     const [redoStacks, setRedoStacks] = useState(Array(wrongData.length).fill().map(() => []));
 
     useEffect(() => {
-        loadPaths()
         console.log("Route Params:", route.params);
 
         const fetchWrongData = async () => {
             try {
-                const response = await axios.get(`http://34.83.186.210:8000/retry/retry/incorrect-answers/${quizId}`);
+                const response = await axios.get(`http://34.127.108.95:8000/retry/retry/incorrect-answers/${quizId}`);
                 console.log("API Response:", response.data);
 
                 const data = response.data;
@@ -66,6 +65,13 @@ const WrongScreen = () => {
     const toggleCorrectAnswer = () => {
         setCorrectAnswerVisible((prev) => !prev);
     };
+
+    useEffect(() => {
+        if(wrongData.length > 0) {
+            loadPaths();
+        }
+    }, [wrongData]);
+
 
 
 
@@ -125,15 +131,15 @@ const WrongScreen = () => {
         }
     };
 
-    // 경로 삭제 로직
     const handleErase = (x, y) => {
+        // 현재 페이지의 paths가 항상 배열로 초기화되도록 보장
         const updatedPaths = [...paths];
-        const currentPaths = updatedPaths[currentPage];
+        const currentPaths = updatedPaths[currentPage] || []; // undefined 방지
         const removedPaths = [];
     
         const filteredPaths = currentPaths.filter((pathObj) => {
             if (!pathObj || !pathObj.path) {
-                return true; // 잘못된 경로는 필터 유지
+                return true; // 잘못된 경로는 유지
             }
     
             const { path } = pathObj;
@@ -148,7 +154,7 @@ const WrongScreen = () => {
             setUndoStacks((prevStacks) => {
                 const newStacks = [...prevStacks];
                 newStacks[currentPage] = [
-                    ...newStacks[currentPage],
+                    ...(newStacks[currentPage] || []), // undefined 방지
                     { type: "erase", paths: removedPaths },
                 ];
                 return newStacks;
@@ -156,7 +162,7 @@ const WrongScreen = () => {
     
             setRedoStacks((prevStacks) => {
                 const newStacks = [...prevStacks];
-                newStacks[currentPage] = [];
+                newStacks[currentPage] = []; // 지우개 작업 이후 redo 초기화
                 return newStacks;
             });
         }
@@ -166,6 +172,7 @@ const WrongScreen = () => {
         handlePathsChange(filteredPaths); // 변경된 경로 저장
         savePaths(updatedPaths);
     };
+    
     
     
 
@@ -226,8 +233,8 @@ const WrongScreen = () => {
 
     const handleUndo = () => {
         const updatedPaths = [...paths];
-        const undoStackForPage = [...undoStacks[currentPage]];
-        const redoStackForPage = [...redoStacks[currentPage]];
+        const undoStackForPage = undoStacks[currentPage] || []; // undefined 방지
+        const redoStackForPage = redoStacks[currentPage] || []; // undefined 방지
     
         if (undoStackForPage.length > 0) {
             const lastAction = undoStackForPage.pop(); // 가장 최근 작업 꺼내기
@@ -235,13 +242,13 @@ const WrongScreen = () => {
             if (lastAction.type === "erase") {
                 // 지우기 작업 복구
                 updatedPaths[currentPage] = [
-                    ...updatedPaths[currentPage],
+                    ...(updatedPaths[currentPage] || []), // undefined 방지
                     ...lastAction.paths,
                 ];
                 redoStackForPage.push(lastAction); // 되돌린 작업을 redoStacks에 저장
             } else if (lastAction.type === "draw") {
                 // 그리기 작업 되돌리기
-                const lastDrawnPath = updatedPaths[currentPage].pop();
+                const lastDrawnPath = (updatedPaths[currentPage] || []).pop(); // undefined 방지
                 redoStackForPage.push({ type: "draw", path: lastDrawnPath });
             }
     
@@ -260,41 +267,46 @@ const WrongScreen = () => {
         }
     };
     
+    
 
     const handleRedo = () => {
         const updatedPaths = [...paths];
-        const redoStackForPage = [...redoStacks[currentPage]];
-        const undoStackForPage = [...undoStacks[currentPage]];
+        const redoStackForPage = redoStacks[currentPage] || []; // undefined 방지
+        const undoStackForPage = undoStacks[currentPage] || []; // undefined 방지
     
         if (redoStackForPage.length > 0) {
             const lastAction = redoStackForPage.pop(); // 가장 최근 되돌린 작업 꺼내기
     
             if (lastAction.type === "erase") {
                 // 다시 삭제 상태로 되돌림
-                updatedPaths[currentPage] = updatedPaths[currentPage].filter(
+                updatedPaths[currentPage] = (updatedPaths[currentPage] || []).filter(
                     (pathObj) => !lastAction.paths.includes(pathObj)
                 );
                 undoStackForPage.push(lastAction); // 되돌린 작업을 undoStacks에 저장
             } else if (lastAction.type === "draw") {
                 // 다시 그린 경로 복구
-                updatedPaths[currentPage].push(lastAction.path);
+                updatedPaths[currentPage] = [
+                    ...(updatedPaths[currentPage] || []),
+                    lastAction.path,
+                ];
                 undoStackForPage.push({ type: "draw", path: lastAction.path });
             }
     
             setPaths(updatedPaths);
-            setRedoStacks((prevStacks) => {
-                const newStacks = [...prevStacks];
-                newStacks[currentPage] = redoStackForPage;
-                return newStacks;
-            });
             setUndoStacks((prevStacks) => {
                 const newStacks = [...prevStacks];
                 newStacks[currentPage] = undoStackForPage;
                 return newStacks;
             });
+            setRedoStacks((prevStacks) => {
+                const newStacks = [...prevStacks];
+                newStacks[currentPage] = redoStackForPage;
+                return newStacks;
+            });
             savePaths(updatedPaths); // 저장
         }
     };
+    
     
 
     const handleResult = () => {
